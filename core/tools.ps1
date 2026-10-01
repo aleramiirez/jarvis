@@ -128,6 +128,42 @@ function Obtener-Herramientas {
         }
 
         @{
+            Nombre = "listar_carpeta"
+            Descripcion = "Lista los archivos y carpetas de una ubicacion permitida."
+            Tipo = "consulta"
+            Capacidades = @(
+                "listar archivos"
+                "listar carpetas"
+                "consultar el contenido de una carpeta"
+            )
+            RequiereConfirmacion = $false
+
+            Parametros = @(
+                @{
+                    Nombre = "carpeta"
+                    Tipo = "string"
+                    Requerido = $true
+                    Descripcion = "Identificador de la carpeta cuyo contenido se quiere consultar."
+                }
+            )
+
+            Objetivos = @(
+                @{
+                    Nombre = "jarvis"
+                    Descripcion = "Carpeta del proyecto JARVIS."
+                    Alias = @(
+                        "archivos del proyecto de jarvis"
+                        "archivos del proyecto jarvis"
+                        "archivos de jarvis"
+                        "contenido del proyecto de jarvis"
+                        "contenido del proyecto jarvis"
+                    )
+                    Respuesta = "Claro. Voy a consultar el contenido del proyecto JARVIS."
+                }
+            )
+        }
+
+        @{
             Nombre = "informacion_sistema"
             Descripcion = "Obtiene informacion del ordenador y del sistema."
             Tipo = "consulta"

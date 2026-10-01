@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 # JARVIS - ASISTENTE LOCAL
 # ============================================================
 
@@ -31,6 +31,7 @@ $OutputEncoding = $utf8
 
 . "$PSScriptRoot\tools\apps.ps1"
 . "$PSScriptRoot\tools\folders.ps1"
+. "$PSScriptRoot\tools\files.ps1"
 . "$PSScriptRoot\tools\system.ps1"
 
 # ============================================================
@@ -463,6 +464,29 @@ while ($true) {
             Agregar-Mensaje-Memoria `
                 "herramienta" `
                 "Accion ejecutada correctamente: $($resultadoIA.Accion) -> $($resultadoIA.Objetivo)"
+
+            # ------------------------------------------------
+            # MOSTRAR RESULTADO DE CONSULTA
+            # ------------------------------------------------
+
+            if (
+                $resultadoIA.Accion -eq "listar_carpeta" -and
+                -not [string]::IsNullOrWhiteSpace(
+                    [string]$resultadoHerramienta.Resultado
+                )
+            ) {
+
+                Write-Host ""
+                Write-Host "JARVIS: Contenido del proyecto JARVIS:" `
+                    -ForegroundColor Cyan
+                Write-Host ""
+
+                Write-Host $resultadoHerramienta.Resultado
+
+                Agregar-Mensaje-Memoria `
+                    "herramienta" `
+                    $resultadoHerramienta.Resultado
+            }
         }
     }
 

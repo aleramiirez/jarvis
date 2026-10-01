@@ -81,6 +81,24 @@ function Ejecutar-Herramienta {
             }
         }
 
+        "listar_carpeta" {
+
+            $resultado = Listar-Carpeta $Objetivo
+
+            if ($null -ne $resultado) {
+
+                return @{
+                    Exito = $true
+                    Resultado = $resultado
+                }
+            }
+
+            return @{
+                Exito = $false
+                Error = "No se ha podido consultar la carpeta '$Objetivo'."
+            }
+        }
+
         "informacion_sistema" {
 
             $resultado = Obtener-InformacionSistema $Objetivo

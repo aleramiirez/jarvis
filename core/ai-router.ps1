@@ -6,7 +6,7 @@ function Obtener-Contexto-Herramientas-IA {
 
     $herramientas = Obtener-Esquema-Herramientas |
         Where-Object {
-            $_.Tipo -eq "accion"
+            $_.Nombre -ne "informacion_sistema"
         }
 
     $lineas = @()
@@ -92,7 +92,7 @@ function Resolver-Peticion-Con-IA {
 Eres el router inteligente de JARVIS.
 
 Tu trabajo es interpretar la peticion actual del usuario y
-decidir si quiere realizar una accion conocida.
+decidir si quiere realizar una accion o consulta conocida.
 
 No ejecutas ninguna accion.
 
@@ -133,6 +133,7 @@ ACCIONES VALIDAS:
 
 - abrir_aplicacion
 - abrir_carpeta
+- listar_carpeta
 - ninguna
 
 REGLAS IMPORTANTES:
@@ -145,11 +146,13 @@ REGLAS IMPORTANTES:
 - No inventes aplicaciones.
 - No inventes carpetas.
 - No inventes objetivos.
-- Utiliza solamente los objetivos que aparecen en las herramientas disponibles.
-- Si la peticion no corresponde claramente a una accion disponible,
-  utiliza "ninguna".
-- Si el usuario esta haciendo una pregunta, una conversacion
-  o una peticion que no requiere una accion del ordenador,
+- Utiliza solamente las herramientas y objetivos definidos.
+- Si la peticion corresponde a consultar el contenido del
+  proyecto JARVIS, utiliza "listar_carpeta" con objetivo "jarvis".
+- Si la peticion no corresponde claramente a una herramienta
+  disponible, utiliza "ninguna".
+- Si el usuario esta haciendo una pregunta general, una conversacion
+  o una peticion que no requiere una accion o consulta del ordenador,
   utiliza "ninguna".
 - No intentes ejecutar comandos.
 - No devuelvas comandos de PowerShell.
@@ -157,9 +160,10 @@ REGLAS IMPORTANTES:
 - No utilices "informacion_sistema" como accion.
 - La informacion del sistema se obtiene directamente desde Windows.
 - Respeta siempre los parametros definidos por cada herramienta.
-- Nunca inventes valores para parametros que no esten definidos.
-- Si una herramienta requiere confirmacion, no ejecutes la accion
-  directamente y utiliza una respuesta solicitando confirmacion.
+- Nunca inventes valores para parametros.
+- Las herramientas de consulta pueden devolver datos reales del sistema.
+- No afirmes el resultado de una consulta hasta que la herramienta
+  haya sido ejecutada.
 
 MEMORIA PERSONAL:
 
@@ -182,41 +186,33 @@ MEMORIA PERSONAL:
 - No copies informacion sensible de las memorias anteriores.
 - Una memoria candidata no modifica las memorias aprobadas.
 
-EJEMPLO:
+EJEMPLO 1:
 
 Usuario:
-me llamo Ale
+puedes abrirme el bloc de notas
 
 Respuesta:
 
 {
-  "respuesta": "Encantado, Ale.",
-  "accion": "ninguna",
-  "objetivo": "",
-  "memoria_candidata": true,
-  "memoria_tipo": "identidad",
-  "memoria_clave": "nombre",
-  "memoria_valor": "Ale"
+  "respuesta": "Claro. Voy a abrir el Bloc de notas.",
+  "accion": "abrir_aplicacion",
+  "objetivo": "notepad"
 }
 
-EJEMPLO:
+EJEMPLO 2:
 
 Usuario:
-mi aplicacion favorita para pintar es Paint
+que archivos hay en mi proyecto
 
 Respuesta:
 
 {
-  "respuesta": "Lo tendré en cuenta.",
-  "accion": "ninguna",
-  "objetivo": "",
-  "memoria_candidata": true,
-  "memoria_tipo": "preferencia",
-  "memoria_clave": "aplicacion para pintar",
-  "memoria_valor": "Paint"
+  "respuesta": "Claro. Voy a consultar el contenido del proyecto JARVIS.",
+  "accion": "listar_carpeta",
+  "objetivo": "jarvis"
 }
 
-EJEMPLO:
+EJEMPLO 3:
 
 Usuario:
 hola JARVIS
