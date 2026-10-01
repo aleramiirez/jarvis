@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # JARVIS - MEMORIA
 # ============================================================
 
@@ -293,7 +293,7 @@ function Puede-Guardar-Memoria-Personal {
 }
 
 # ============================================================
-# AÑADIR MEMORIA PERSONAL
+# AÑADIR O ACTUALIZAR MEMORIA PERSONAL
 # ============================================================
 
 function Agregar-Memoria-Personal {
@@ -324,7 +324,6 @@ function Agregar-Memoria-Personal {
 
         $existente.Tipo = $Tipo
         $existente.Valor = $Valor
-
     }
     else {
 
@@ -336,6 +335,68 @@ function Agregar-Memoria-Personal {
     }
 
     return Guardar-Memorias-Personales
+}
+
+# ============================================================
+# BUSCAR MEMORIA PERSONAL
+# ============================================================
+
+function Obtener-Memoria-Personal {
+
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Clave
+    )
+
+    $claveNormalizada = Normalizar-Texto $Clave
+
+    foreach ($memoria in $script:JARVIS_MEMORIAS_PERSONALES) {
+
+        if (
+            (Normalizar-Texto $memoria.Clave) -eq
+            $claveNormalizada
+        ) {
+
+            return $memoria
+        }
+    }
+
+    return $null
+}
+
+# ============================================================
+# ELIMINAR MEMORIA PERSONAL
+# ============================================================
+
+function Eliminar-Memoria-Personal {
+
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Clave
+    )
+
+    $claveNormalizada = Normalizar-Texto $Clave
+
+    $memoriasRestantes = @(
+        $script:JARVIS_MEMORIAS_PERSONALES |
+            Where-Object {
+                (Normalizar-Texto $_.Clave) -ne
+                $claveNormalizada
+            }
+    )
+
+    $eliminada =
+        $memoriasRestantes.Count -lt
+        $script:JARVIS_MEMORIAS_PERSONALES.Count
+
+    $script:JARVIS_MEMORIAS_PERSONALES = $memoriasRestantes
+
+    if ($eliminada) {
+
+        Guardar-Memorias-Personales | Out-Null
+    }
+
+    return $eliminada
 }
 
 # ============================================================

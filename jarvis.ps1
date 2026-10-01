@@ -22,6 +22,7 @@ $OutputEncoding = $utf8
 . "$PSScriptRoot\core\tools.ps1"
 . "$PSScriptRoot\core\router.ps1"
 . "$PSScriptRoot\core\memory.ps1"
+. "$PSScriptRoot\core\memory-router.ps1"
 . "$PSScriptRoot\core\ai-router.ps1"
 
 # ============================================================
@@ -87,6 +88,7 @@ while ($true) {
     $mensaje = Read-Host "TU"
 
     if ([string]::IsNullOrWhiteSpace($mensaje)) {
+
         continue
     }
 
@@ -120,13 +122,13 @@ while ($true) {
     }
 
     # ========================================================
-    # MOSTRAR MEMORIAS
+    # MOSTRAR MEMORIAS - COMANDO
     # ========================================================
 
     if ($mensajeNormalizado -eq "/memorias") {
 
         Write-Host ""
-        Write-Host "JARVIS: Estas son mis memorias personales de esta sesion:" `
+        Write-Host "JARVIS: Estas son mis memorias personales:" `
             -ForegroundColor Cyan
 
         Write-Host ""
@@ -152,7 +154,7 @@ while ($true) {
     }
 
     # ========================================================
-    # OLVIDAR MEMORIAS PERSONALES
+    # OLVIDAR MEMORIAS - COMANDO
     # ========================================================
 
     if ($mensajeNormalizado -eq "/olvidar-memorias") {
@@ -165,6 +167,90 @@ while ($true) {
         Write-Host ""
 
         continue
+    }
+
+    # ========================================================
+    # ROUTER NATURAL DE MEMORIA
+    # ========================================================
+
+    $rutaMemoria = Obtener-Ruta-Memoria $mensaje
+
+    if ($null -ne $rutaMemoria) {
+
+        # ----------------------------------------------------
+        # MOSTRAR MEMORIAS
+        # ----------------------------------------------------
+
+        if ($rutaMemoria.Tipo -eq "mostrar_memorias") {
+
+            Write-Host ""
+            Write-Host "JARVIS: Estas son mis memorias personales:" `
+                -ForegroundColor Cyan
+
+            Write-Host ""
+
+            $memorias = Obtener-Memorias-Personales
+
+            if ($memorias.Count -eq 0) {
+
+                Write-Host "No hay memorias personales guardadas." `
+                    -ForegroundColor DarkGray
+            }
+            else {
+
+                foreach ($memoria in $memorias) {
+
+                    Write-Host "- $($memoria.Clave): $($memoria.Valor)"
+                }
+            }
+
+            Write-Host ""
+
+            continue
+        }
+
+        # ----------------------------------------------------
+        # LIMPIAR MEMORIAS
+        # ----------------------------------------------------
+
+        if ($rutaMemoria.Tipo -eq "limpiar_memorias") {
+
+            Limpiar-Memorias-Personales
+
+            Write-Host ""
+            Write-Host "JARVIS: He borrado todas las memorias personales." `
+                -ForegroundColor Cyan
+            Write-Host ""
+
+            continue
+        }
+
+        # ----------------------------------------------------
+        # ELIMINAR MEMORIA CONCRETA
+        # ----------------------------------------------------
+
+        if ($rutaMemoria.Tipo -eq "eliminar_memoria") {
+
+            $eliminada = Eliminar-Memoria-Personal `
+                $rutaMemoria.Clave
+
+            Write-Host ""
+
+            if ($eliminada) {
+
+                Write-Host "JARVIS: He olvidado la memoria '$($rutaMemoria.Clave)'." `
+                    -ForegroundColor Cyan
+            }
+            else {
+
+                Write-Host "JARVIS: No tengo ninguna memoria llamada '$($rutaMemoria.Clave)'." `
+                    -ForegroundColor Yellow
+            }
+
+            Write-Host ""
+
+            continue
+        }
     }
 
     # ========================================================
