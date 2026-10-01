@@ -19,8 +19,9 @@ $OutputEncoding = $utf8
 # ============================================================
 
 . "$PSScriptRoot\core\text.ps1"
-. "$PSScriptRoot\core\router.ps1"
 . "$PSScriptRoot\core\tools.ps1"
+. "$PSScriptRoot\core\router.ps1"
+. "$PSScriptRoot\core\ai-router.ps1"
 
 # ============================================================
 # CARGAR HERRAMIENTAS
@@ -125,7 +126,7 @@ while ($true) {
     }
 
     # ========================================================
-    # 3. OLLAMA
+    # 3. ROUTER IA
     # ========================================================
 
     Write-Host ""
@@ -133,146 +134,43 @@ while ($true) {
         -ForegroundColor Cyan
     Write-Host ""
 
-    # ========================================================
-    # PROMPT
-    # ========================================================
+    $resultadoIA = Resolver-Peticion-Con-IA $mensaje
 
-    $prompt = @"
-Eres JARVIS, un asistente personal local de Windows.
-
-Analiza la peticion del usuario y devuelve exclusivamente
-un objeto JSON valido.
-
-El JSON debe tener exactamente estos campos:
-
-{
-  "respuesta": "mensaje para el usuario",
-  "accion": "ninguna",
-  "objetivo": ""
-}
-
-ACCIONES DISPONIBLES:
-
-abrir_aplicacion
-abrir_carpeta
-ninguna
-
-APLICACIONES PERMITIDAS:
-
-notepad
-calc
-mspaint
-cmd
-powershell
-explorer
-
-CARPETA PERMITIDA:
-
-jarvis
-
-REGLAS:
-
-- Responde siempre en espanol.
-- La respuesta debe ser breve, clara y natural.
-- No inventes informacion sobre el ordenador.
-- No inventes informacion del sistema.
-- No inventes acciones.
-- No afirmes que has realizado una accion si no se ha ejecutado.
-- Utiliza exactamente los nombres de las acciones disponibles.
-- Devuelve solamente JSON valido.
-- No escribas Markdown.
-- No escribas explicaciones fuera del JSON.
-
-Peticion del usuario:
-
-$mensaje
-"@
-
-    # ========================================================
-    # BODY
-    # ========================================================
-
-    $body = @{
-        model = $JARVIS_MODEL
-        prompt = $prompt
-        stream = $false
-        think = $false
-        format = "json"
-    } | ConvertTo-Json -Compress
-
-    # ========================================================
-    # PETICION A OLLAMA
-    # ========================================================
-
-    try {
-
-        $resultado = Invoke-RestMethod `
-            -Uri $OLLAMA_GENERATE_URL `
-            -Method Post `
-            -ContentType "application/json; charset=utf-8" `
-            -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
-    }
-    catch {
+    if (-not $resultadoIA.Exito) {
 
         Write-Host ""
-        Write-Host "JARVIS: No puedo conectar con Ollama." `
+        Write-Host "JARVIS: $($resultadoIA.Error)" `
             -ForegroundColor Red
-
-        Write-Host $_.Exception.Message `
-            -ForegroundColor DarkRed
-
         Write-Host ""
 
         continue
     }
 
     # ========================================================
-    # PARSEAR RESPUESTA
-    # ========================================================
-
-    try {
-
-        $jarvis = $resultado.response | ConvertFrom-Json
-    }
-    catch {
-
-        Write-Host ""
-        Write-Host "JARVIS: La respuesta del modelo no es valida." `
-            -ForegroundColor Red
-
-        Write-Host ""
-
-        continue
-    }
-
-    # ========================================================
-    # RESPUESTA DE OLLAMA
+    # RESPUESTA DE IA
     # ========================================================
 
     if (
         -not [string]::IsNullOrWhiteSpace(
-            [string]$jarvis.respuesta
+            [string]$resultadoIA.Respuesta
         )
     ) {
 
         Write-Host "JARVIS: " -ForegroundColor Cyan -NoNewline
-        Write-Host $jarvis.respuesta
+        Write-Host $resultadoIA.Respuesta
     }
 
     # ========================================================
-    # ACCIONES DEVUELTAS POR OLLAMA
+    # EJECUTAR ACCION DE IA
     # ========================================================
 
     if (
-        -not [string]::IsNullOrWhiteSpace(
-            [string]$jarvis.accion
-        ) -and
-        $jarvis.accion -ne "ninguna"
+        $resultadoIA.Accion -ne "ninguna"
     ) {
 
         $resultadoHerramienta = Ejecutar-Herramienta `
-            $jarvis.accion `
-            $jarvis.objetivo
+            $resultadoIA.Accion `
+            $resultadoIA.Objetivo
 
         if (-not $resultadoHerramienta.Exito) {
 
