@@ -1,348 +1,347 @@
 ﻿# ============================================================
-# JARVIS - REGISTRO DE HERRAMIENTAS
+# JARVIS - HERRAMIENTAS DE ARCHIVOS
 # ============================================================
 
-# ============================================================
-# OBTENER HERRAMIENTAS DISPONIBLES
-# ============================================================
-
-function Obtener-Herramientas {
-
-    return @(
-        @{
-            Nombre = "abrir_aplicacion"
-            Descripcion = "Abre una aplicacion permitida de Windows."
-            Tipo = "accion"
-            Prioridad = 30
-
-            Capacidades = @(
-                "abrir aplicaciones de Windows"
-            )
-
-            RequiereConfirmacion = $false
-
-            Parametros = @(
-                @{
-                    Nombre = "aplicacion"
-                    Tipo = "string"
-                    Requerido = $true
-                    Descripcion = "Identificador de la aplicacion que se quiere abrir."
-                }
-            )
-
-            Objetivos = @(
-                @{
-                    Nombre = "notepad"
-                    Descripcion = "Bloc de notas de Windows."
-                    Alias = @(
-                        "bloc de notas"
-                        "notepad"
-                    )
-                    Respuesta = "Entendido. Voy a abrir el Bloc de notas."
-                }
-
-                @{
-                    Nombre = "calc"
-                    Descripcion = "Calculadora de Windows."
-                    Alias = @(
-                        "calculadora"
-                        "abre calc"
-                        "abrir calc"
-                    )
-                    Respuesta = "Entendido. Voy a abrir la Calculadora."
-                }
-
-                @{
-                    Nombre = "mspaint"
-                    Descripcion = "Microsoft Paint."
-                    Alias = @(
-                        "abre paint"
-                        "abrir paint"
-                        "paint"
-                    )
-                    Respuesta = "Entendido. Voy a abrir Paint."
-                }
-
-                @{
-                    Nombre = "cmd"
-                    Descripcion = "Consola de comandos de Windows."
-                    Alias = @(
-                        "abre cmd"
-                        "abrir cmd"
-                    )
-                    Respuesta = "Entendido. Voy a abrir CMD."
-                }
-
-                @{
-                    Nombre = "powershell"
-                    Descripcion = "PowerShell de Windows."
-                    Alias = @(
-                        "abre powershell"
-                        "abrir powershell"
-                    )
-                    Respuesta = "Entendido. Voy a abrir PowerShell."
-                }
-
-                @{
-                    Nombre = "explorer"
-                    Descripcion = "Explorador de archivos de Windows."
-                    Alias = @(
-                        "abre el explorador"
-                        "abre explorador"
-                        "abrir el explorador"
-                        "abrir explorador"
-                    )
-                    Respuesta = "Entendido. Voy a abrir el Explorador."
-                }
-            )
-        }
-
-        @{
-            Nombre = "listar_carpeta"
-            Descripcion = "Lista los archivos y carpetas de una ubicacion permitida."
-            Tipo = "consulta"
-            Prioridad = 10
-
-            Capacidades = @(
-                "listar archivos"
-                "listar carpetas"
-                "consultar el contenido de una carpeta"
-            )
-
-            RequiereConfirmacion = $false
-
-            Parametros = @(
-                @{
-                    Nombre = "carpeta"
-                    Tipo = "string"
-                    Requerido = $true
-                    Descripcion = "Identificador de la carpeta cuyo contenido se quiere consultar."
-                }
-            )
-
-            Objetivos = @(
-                @{
-                    Nombre = "jarvis"
-                    Descripcion = "Carpeta del proyecto JARVIS."
-                    Alias = @(
-                        "que archivos hay en mi proyecto"
-                        "que archivos hay en el proyecto"
-                        "archivos del proyecto de jarvis"
-                        "archivos del proyecto jarvis"
-                        "archivos de jarvis"
-                        "contenido del proyecto de jarvis"
-                        "contenido del proyecto jarvis"
-                        "que hay en la carpeta de jarvis"
-                        "que hay en la carpeta jarvis"
-                        "ensename que hay en la carpeta de jarvis"
-                        "ensename que hay en la carpeta jarvis"
-                        "muestrame que hay en la carpeta de jarvis"
-                        "muestrame que hay en la carpeta jarvis"
-                    )
-                    Respuesta = "Claro. Voy a consultar el contenido del proyecto JARVIS."
-                }
-            )
-        }
-
-        @{
-            Nombre = "buscar_archivo"
-            Descripcion = "Busca archivos por nombre dentro de una ubicacion permitida."
-            Tipo = "consulta"
-            Prioridad = 15
-
-            Capacidades = @(
-                "buscar archivos por nombre"
-                "localizar un archivo"
-                "encontrar un archivo dentro de una carpeta"
-            )
-
-            RequiereConfirmacion = $false
-
-            Parametros = @(
-                @{
-                    Nombre = "consulta"
-                    Tipo = "string"
-                    Requerido = $true
-                    Descripcion = "Nombre o parte del nombre del archivo que se quiere buscar."
-                }
-            )
-
-            Objetivos = @(
-                @{
-                    Nombre = "jarvis"
-                    Descripcion = "Buscar dentro del proyecto JARVIS."
-                    Alias = @()
-                    Respuesta = "Claro. Voy a buscar el archivo en el proyecto JARVIS."
-                }
-            )
-        }
-
-        @{
-            Nombre = "abrir_carpeta"
-            Descripcion = "Abre una carpeta permitida del sistema."
-            Tipo = "accion"
-            Prioridad = 20
-
-            Capacidades = @(
-                "abrir carpetas permitidas del sistema"
-            )
-
-            RequiereConfirmacion = $false
-
-            Parametros = @(
-                @{
-                    Nombre = "carpeta"
-                    Tipo = "string"
-                    Requerido = $true
-                    Descripcion = "Identificador de la carpeta que se quiere abrir."
-                }
-            )
-
-            Objetivos = @(
-                @{
-                    Nombre = "jarvis"
-                    Descripcion = "Carpeta del proyecto JARVIS."
-                    Alias = @(
-                        "proyecto de jarvis"
-                        "proyecto jarvis"
-                        "abrir la carpeta de jarvis"
-                        "abre la carpeta de jarvis"
-                        "abre la carpeta jarvis"
-                        "abrir carpeta jarvis"
-                    )
-                    Respuesta = "Entendido. Voy a abrir el proyecto JARVIS."
-                }
-            )
-        }
-
-        @{
-            Nombre = "informacion_sistema"
-            Descripcion = "Obtiene informacion del ordenador y del sistema."
-            Tipo = "consulta"
-            Prioridad = 5
-
-            Capacidades = @(
-                "consultar la hora"
-                "consultar la fecha"
-                "consultar el nombre del ordenador"
-                "consultar la memoria RAM"
-                "consultar el procesador"
-                "consultar el sistema operativo"
-                "consultar el modelo del ordenador"
-            )
-
-            RequiereConfirmacion = $false
-
-            Parametros = @(
-                @{
-                    Nombre = "consulta"
-                    Tipo = "string"
-                    Requerido = $true
-                    Descripcion = "Pregunta sobre la informacion del sistema que se quiere obtener."
-                }
-            )
-
-            Objetivos = @()
-        }
-    )
-}
-
-# ============================================================
-# BUSCAR UNA HERRAMIENTA
-# ============================================================
-
-function Obtener-Herramienta {
+function Listar-Carpeta {
 
     param (
         [Parameter(Mandatory = $true)]
-        [string]$Nombre
+        [string]$Carpeta
     )
 
-    $herramientas = Obtener-Herramientas
+    switch ($Carpeta.ToLower()) {
 
-    foreach ($herramienta in $herramientas) {
+        "jarvis" {
 
-        if ($herramienta.Nombre -eq $Nombre) {
+            $ruta = "C:\dev\proyectos\jarvis"
 
-            return $herramienta
+            if (-not (Test-Path $ruta -PathType Container)) {
+
+                return $null
+            }
+
+            try {
+
+                $elementos = @(
+                    Get-ChildItem `
+                        -Path $ruta `
+                        -Force |
+                        Sort-Object `
+                            @{ Expression = "PSIsContainer"; Descending = $true },
+                            Name
+                )
+
+                if ($elementos.Count -eq 0) {
+
+                    return "La carpeta JARVIS esta vacia."
+                }
+
+                $lineas = @()
+
+                foreach ($elemento in $elementos) {
+
+                    if ($elemento.PSIsContainer) {
+
+                        $lineas += "[CARPETA] $($elemento.Name)"
+                    }
+                    else {
+
+                        $lineas += "[ARCHIVO] $($elemento.Name)"
+                    }
+                }
+
+                return $lineas -join "`n"
+            }
+            catch {
+
+                return $null
+            }
+        }
+
+        default {
+
+            return $null
         }
     }
-
-    return $null
 }
 
 # ============================================================
-# COMPROBAR SI EXISTE UNA HERRAMIENTA
+# OBTENER INDICE DE ARCHIVOS DEL PROYECTO
 # ============================================================
 
-function Existe-Herramienta {
+function Obtener-Archivos-Proyecto {
 
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$Nombre
-    )
+    $ruta = "C:\dev\proyectos\jarvis"
 
-    return $null -ne (Obtener-Herramienta $Nombre)
-}
+    if (-not (Test-Path $ruta -PathType Container)) {
 
-# ============================================================
-# BUSCAR UN OBJETIVO DE UNA HERRAMIENTA
-# ============================================================
-
-function Obtener-Objetivo-Herramienta {
-
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$Herramienta,
-
-        [Parameter(Mandatory = $true)]
-        [string]$Objetivo
-    )
-
-    $herramientaRegistrada = Obtener-Herramienta $Herramienta
-
-    if ($null -eq $herramientaRegistrada) {
-
-        return $null
+        return @()
     }
 
-    foreach ($objetivoRegistrado in $herramientaRegistrada.Objetivos) {
+    try {
 
-        if ($objetivoRegistrado.Nombre -eq $Objetivo) {
+        $archivos = @(
+            Get-ChildItem `
+                -Path $ruta `
+                -Recurse `
+                -File `
+                -Force `
+                -ErrorAction Stop |
+                Where-Object {
+                    $_.FullName -notmatch '\\\.git\\' -and
+                    $_.FullName -notmatch '\\data\\'
+                }
+        )
 
-            return $objetivoRegistrado
+        $resultado = @()
+
+        foreach ($archivo in $archivos) {
+
+            $rutaRelativa = $archivo.FullName.Substring(
+                $ruta.Length
+            ).TrimStart("\")
+
+            $resultado += $rutaRelativa
+        }
+
+        return $resultado | Sort-Object
+    }
+    catch {
+
+        return @()
+    }
+}
+
+# ============================================================
+# BUSCAR ARCHIVO
+# ============================================================
+
+function Buscar-Archivo {
+
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Carpeta,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Consulta
+    )
+
+    switch ($Carpeta.ToLower()) {
+
+        "jarvis" {
+
+            $ruta = "C:\dev\proyectos\jarvis"
+
+            if (-not (Test-Path $ruta -PathType Container)) {
+
+                return $null
+            }
+
+            if ([string]::IsNullOrWhiteSpace($Consulta)) {
+
+                return $null
+            }
+
+            # =================================================
+            # SEGURIDAD
+            # =================================================
+
+            if (
+                $Consulta.Contains("\") -or
+                $Consulta.Contains("/") -or
+                $Consulta.Contains("..")
+            ) {
+
+                return $null
+            }
+
+            try {
+
+                $consultaNormalizada = Normalizar-Texto $Consulta
+
+                $elementos = @(
+                    Get-ChildItem `
+                        -Path $ruta `
+                        -Recurse `
+                        -File `
+                        -Force `
+                        -ErrorAction Stop |
+                        Where-Object {
+                            $_.FullName -notmatch '\\\.git\\' -and
+                            $_.FullName -notmatch '\\data\\'
+                        }
+                )
+
+                $resultados = @()
+
+                foreach ($elemento in $elementos) {
+
+                    $nombre = $elemento.Name
+                    $nombreSinExtension =
+                        [System.IO.Path]::GetFileNameWithoutExtension(
+                            $nombre
+                        )
+
+                    $nombreNormalizado =
+                        Normalizar-Texto $nombre
+
+                    $nombreBaseNormalizado =
+                        Normalizar-Texto $nombreSinExtension
+
+                    $puntuacion = 0
+
+                    # =================================================
+                    # COINCIDENCIA EXACTA
+                    # =================================================
+
+                    if ($nombreNormalizado -eq $consultaNormalizada) {
+
+                        $puntuacion = 1000
+                    }
+                    elseif (
+                        $nombreBaseNormalizado -eq
+                        $consultaNormalizada
+                    ) {
+
+                        $puntuacion = 950
+                    }
+                    elseif (
+                        $nombreNormalizado.StartsWith(
+                            $consultaNormalizada
+                        )
+                    ) {
+
+                        $puntuacion = 800
+                    }
+                    elseif (
+                        $nombreNormalizado.Contains(
+                            $consultaNormalizada
+                        )
+                    ) {
+
+                        $puntuacion = 700
+                    }
+                    else {
+
+                        # =============================================
+                        # COINCIDENCIA POR PALABRAS
+                        # =============================================
+
+                        $tokens = @(
+                            $consultaNormalizada -split '\s+' |
+                                Where-Object {
+                                    $_.Length -ge 2
+                                }
+                        )
+
+                        if ($tokens.Count -gt 0) {
+
+                            $coincidencias = 0
+
+                            foreach ($token in $tokens) {
+
+                                if (
+                                    $nombreNormalizado.Contains(
+                                        $token
+                                    )
+                                ) {
+
+                                    $coincidencias++
+                                }
+                            }
+
+                            if ($coincidencias -eq $tokens.Count) {
+
+                                $puntuacion = 650
+                            }
+                            elseif ($coincidencias -gt 0) {
+
+                                $puntuacion =
+                                    300 +
+                                    ($coincidencias * 50)
+                            }
+                        }
+                    }
+
+                    if ($puntuacion -gt 0) {
+
+                        $rutaRelativa =
+                            $elemento.FullName.Substring(
+                                $ruta.Length
+                            ).TrimStart("\")
+
+                        $resultados += [PSCustomObject]@{
+                            Ruta = $rutaRelativa
+                            Puntuacion = $puntuacion
+                            Nombre = $elemento.Name
+                        }
+                    }
+                }
+
+                # =====================================================
+                # ORDENAR RESULTADOS
+                # =====================================================
+
+                $resultados = @(
+                    $resultados |
+                        Sort-Object `
+                            @{ Expression = "Puntuacion"; Descending = $true },
+                            @{ Expression = "Ruta"; Descending = $false } |
+                        Select-Object -First 20
+                )
+
+                if ($resultados.Count -eq 0) {
+
+                    return "No he encontrado ningun archivo que coincida con '$Consulta'."
+                }
+
+                $lineas = @()
+
+                # =====================================================
+                # MEJOR COINCIDENCIA
+                # =====================================================
+
+                $mejor = $resultados[0]
+
+                $lineas += "Mejor coincidencia:"
+                $lineas += "[ARCHIVO] $($mejor.Ruta)"
+
+                # =====================================================
+                # OTRAS COINCIDENCIAS
+                # =====================================================
+
+                if ($resultados.Count -gt 1) {
+
+                    $lineas += ""
+                    $lineas += "Otras coincidencias:"
+
+                    for (
+                        $indice = 1;
+                        $indice -lt $resultados.Count;
+                        $indice++
+                    ) {
+
+                        $lineas += "[ARCHIVO] $($resultados[$indice].Ruta)"
+                    }
+                }
+
+                if ($resultados.Count -eq 20) {
+
+                    $lineas += ""
+                    $lineas += "Se muestran los primeros 20 resultados."
+                }
+
+                return $lineas -join "`n"
+            }
+            catch {
+
+                return $null
+            }
+        }
+
+        default {
+
+            return $null
         }
     }
-
-    return $null
-}
-
-# ============================================================
-# COMPROBAR SI EXISTE UN OBJETIVO
-# ============================================================
-
-function Existe-Objetivo-Herramienta {
-
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$Herramienta,
-
-        [Parameter(Mandatory = $true)]
-        [string]$Objetivo
-    )
-
-    return $null -ne (
-        Obtener-Objetivo-Herramienta `
-            $Herramienta `
-            $Objetivo
-    )
-}
-
-# ============================================================
-# OBTENER ESQUEMA DE HERRAMIENTAS
-# ============================================================
-
-function Obtener-Esquema-Herramientas {
-
-    return Obtener-Herramientas
 }
