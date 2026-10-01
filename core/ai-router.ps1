@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 # JARVIS - ROUTER DE INTELIGENCIA ARTIFICIAL
 # ============================================================
 
@@ -79,6 +79,62 @@ function Obtener-Contexto-Archivos-IA {
 }
 
 # ============================================================
+# OBTENER IDENTIFICADOR TECNICO DEL MENSAJE
+# ============================================================
+
+function Obtener-Identificador-Tecnico {
+
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Mensaje
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Mensaje)) {
+
+        return $null
+    }
+
+    # ========================================================
+    # IDENTIFICADORES CON GUION BAJO
+    #
+    # Ejemplo:
+    # OLLAMA_GENERATE_URL
+    # POSTGRE_HOST
+    # JARVIS_MODEL
+    # ========================================================
+
+    $coincidencias = [regex]::Matches(
+        $Mensaje,
+        '\b[A-Za-z][A-Za-z0-9]*_[A-Za-z0-9_-]+\b'
+    )
+
+    foreach ($coincidencia in $coincidencias) {
+
+        return $coincidencia.Value
+    }
+
+    # ========================================================
+    # IDENTIFICADORES CON GUION
+    #
+    # Ejemplo:
+    # ai-router.ps1
+    # memory.ps1
+    # ========================================================
+
+    $coincidencias = [regex]::Matches(
+        $Mensaje,
+        '\b[A-Za-z][A-Za-z0-9_-]*-[A-Za-z0-9_-]+\b'
+    )
+
+    foreach ($coincidencia in $coincidencias) {
+
+        return $coincidencia.Value
+    }
+
+    return $null
+}
+
+# ============================================================
 # RESOLVER PETICION CON IA
 # ============================================================
 
@@ -97,6 +153,8 @@ function Resolver-Peticion-Con-IA {
 
     $contextoHerramientas = Obtener-Contexto-Herramientas-IA
     $contextoArchivos = Obtener-Contexto-Archivos-IA
+
+    $identificadorTecnico = Obtener-Identificador-Tecnico $Mensaje
 
     if ([string]::IsNullOrWhiteSpace($Historial)) {
 
@@ -167,6 +225,7 @@ ACCIONES VALIDAS:
 - buscar_archivo
 - leer_archivo
 - analizar_archivo
+- buscar_contenido
 - ninguna
 
 REGLAS IMPORTANTES:
@@ -241,71 +300,157 @@ ANALISIS DE ARCHIVOS:
 - Si el usuario solamente pide ver el codigo, utiliza "leer_archivo".
 - Si pide entender que hace, utiliza "analizar_archivo".
 
-EJEMPLO:
+BUSQUEDA DE CONTENIDO:
 
-Usuario:
-lee el archivo de la memoria
+- Si el usuario pregunta DONDE se hace algo dentro del codigo,
+  DONDE se encuentra una funcion, variable, clase, configuracion,
+  URL, proceso o concepto relacionado con el proyecto JARVIS,
+  utiliza:
 
-Respuesta:
-
-{
-  "respuesta": "Claro. Voy a leer ese archivo del proyecto JARVIS.",
-  "accion": "leer_archivo",
-  "objetivo": "jarvis",
-  "parametros": {
-    "ruta": "core\\memory.ps1"
-  },
-  "memoria_candidata": false,
-  "memoria_tipo": "",
-  "memoria_clave": "",
-  "memoria_valor": ""
-}
-
-EJEMPLO:
-
-Usuario:
-lee el archivo de la memoria y dime que hace
-
-Respuesta:
-
-{
-  "respuesta": "Claro. Voy a analizar ese archivo del proyecto JARVIS.",
-  "accion": "analizar_archivo",
-  "objetivo": "jarvis",
-  "parametros": {
-    "ruta": "core\\memory.ps1"
-  },
-  "memoria_candidata": false,
-  "memoria_tipo": "",
-  "memoria_clave": "",
-  "memoria_valor": ""
-}
-
-EJEMPLO:
-
-Usuario:
-explicame el router de inteligencia artificial
-
-Respuesta:
-
-{
-  "respuesta": "Claro. Voy a analizar ese archivo del proyecto JARVIS.",
-  "accion": "analizar_archivo",
-  "objetivo": "jarvis",
-  "parametros": {
-    "ruta": "core\\ai-router.ps1"
-  },
-  "memoria_candidata": false,
-  "memoria_tipo": "",
-  "memoria_clave": "",
-  "memoria_valor": ""
-}
-
-- Si la peticion corresponde a consultar el contenido del
-  proyecto JARVIS, utiliza:
-
-  accion = "listar_carpeta"
+  accion = "buscar_contenido"
   objetivo = "jarvis"
+
+- "parametros.consulta" debe contener uno o varios TERMINOS
+  CONCRETOS que puedan aparecer realmente dentro del codigo.
+
+- Si el usuario escribe un identificador tecnico exacto,
+  COPIALO EXACTAMENTE.
+
+- Nunca cambies, corrijas ni reformules un identificador tecnico
+  escrito por el usuario.
+
+- Ejemplo:
+
+  Usuario:
+  ¿Dónde aparece OLLAMA_GENERATE_URL?
+
+  El parametro debe ser exactamente:
+
+  "consulta": "OLLAMA_GENERATE_URL"
+
+- No escribas:
+
+  "OLLMAMA_GENERATE_URL"
+
+- No escribas:
+
+  "ollama_generate_url"
+
+- No traduzcas ni reformules identificadores tecnicos.
+
+- Si el usuario pregunta donde aparece una tecnologia como Ollama,
+  utiliza "Ollama".
+
+- Si el usuario pregunta donde se realiza una conexion,
+  configuracion o proceso, prioriza los terminos tecnicos que
+  aparezcan en la peticion.
+
+Ejemplo:
+
+Usuario:
+¿Dónde se conecta JARVIS con Ollama?
+
+Respuesta:
+
+{
+  "respuesta": "Claro. Voy a buscar dónde aparece Ollama en el código del proyecto JARVIS.",
+  "accion": "buscar_contenido",
+  "objetivo": "jarvis",
+  "parametros": {
+    "consulta": "Ollama"
+  },
+  "memoria_candidata": false,
+  "memoria_tipo": "",
+  "memoria_clave": "",
+  "memoria_valor": ""
+}
+
+Ejemplo:
+
+Usuario:
+¿Dónde aparece OLLAMA_GENERATE_URL?
+
+Respuesta:
+
+{
+  "respuesta": "Claro. Voy a buscar OLLAMA_GENERATE_URL en el código del proyecto JARVIS.",
+  "accion": "buscar_contenido",
+  "objetivo": "jarvis",
+  "parametros": {
+    "consulta": "OLLAMA_GENERATE_URL"
+  },
+  "memoria_candidata": false,
+  "memoria_tipo": "",
+  "memoria_clave": "",
+  "memoria_valor": ""
+}
+
+Ejemplo:
+
+Usuario:
+¿Dónde se hace la petición HTTP a Ollama?
+
+Respuesta:
+
+{
+  "respuesta": "Claro. Voy a buscar cómo se realiza la petición HTTP a Ollama en el código.",
+  "accion": "buscar_contenido",
+  "objetivo": "jarvis",
+  "parametros": {
+    "consulta": "Ollama"
+  },
+  "memoria_candidata": false,
+  "memoria_tipo": "",
+  "memoria_clave": "",
+  "memoria_valor": ""
+}
+
+Ejemplo:
+
+Usuario:
+¿Dónde se guarda la memoria personal?
+
+Respuesta:
+
+{
+  "respuesta": "Claro. Voy a buscar dónde se guarda la memoria personal.",
+  "accion": "buscar_contenido",
+  "objetivo": "jarvis",
+  "parametros": {
+    "consulta": "Guardar-Memorias-Personales"
+  },
+  "memoria_candidata": false,
+  "memoria_tipo": "",
+  "memoria_clave": "",
+  "memoria_valor": ""
+}
+
+Ejemplo:
+
+Usuario:
+¿Dónde se valida si una memoria es segura?
+
+Respuesta:
+
+{
+  "respuesta": "Claro. Voy a buscar la validación de seguridad de la memoria.",
+  "accion": "buscar_contenido",
+  "objetivo": "jarvis",
+  "parametros": {
+    "consulta": "Puede-Guardar-Memoria-Personal"
+  },
+  "memoria_candidata": false,
+  "memoria_tipo": "",
+  "memoria_clave": "",
+  "memoria_valor": ""
+}
+
+- Si el usuario pregunta "donde" se realiza algo dentro del
+  codigo, considera primero "buscar_contenido" antes que
+  "buscar_archivo".
+
+- "buscar_archivo" sirve para localizar NOMBRES DE ARCHIVOS.
+- "buscar_contenido" sirve para localizar COSAS DENTRO DE LOS ARCHIVOS.
 
 - Si la peticion no corresponde claramente a una herramienta
   disponible, utiliza "ninguna".
@@ -583,6 +728,35 @@ $Mensaje
     if ([string]::IsNullOrWhiteSpace($accion)) {
 
         $accion = "ninguna"
+    }
+
+    # ========================================================
+    # CORREGIR IDENTIFICADORES TECNICOS
+    # ========================================================
+    #
+    # La IA puede cometer pequeños errores de escritura.
+    # Cuando el usuario ha escrito un identificador tecnico
+    # exacto, PowerShell tiene prioridad sobre la respuesta de IA.
+    #
+    # Ejemplo:
+    #
+    # Usuario:
+    # ¿Dónde aparece OLLAMA_GENERATE_URL?
+    #
+    # Ollama podria devolver:
+    # OLLMAMA_GENERATE_URL
+    #
+    # Pero nosotros conservamos:
+    # OLLAMA_GENERATE_URL
+    #
+    # ========================================================
+
+    if (
+        $accion -eq "buscar_contenido" -and
+        -not [string]::IsNullOrWhiteSpace($identificadorTecnico)
+    ) {
+
+        $parametros["consulta"] = $identificadorTecnico
     }
 
     # ========================================================

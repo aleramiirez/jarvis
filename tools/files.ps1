@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 # JARVIS - HERRAMIENTAS DE ARCHIVOS
 # ============================================================
 
@@ -88,8 +88,12 @@ function Obtener-Archivos-Proyecto {
                 -Force `
                 -ErrorAction Stop |
                 Where-Object {
+
                     $_.FullName -notmatch '\\\.git\\' -and
-                    $_.FullName -notmatch '\\data\\'
+                    $_.FullName -notmatch '\\data\\' -and
+                    $_.Name -notmatch '_backup\.' -and
+                    $_.Name -notmatch '\.bak$' -and
+                    $_.Name -notmatch '\.tmp$'
                 }
         )
 
@@ -99,7 +103,7 @@ function Obtener-Archivos-Proyecto {
 
             $rutaRelativa = $archivo.FullName.Substring(
                 $ruta.Length
-            ).TrimStart("\\")
+            ).TrimStart("\")
 
             $resultado += $rutaRelativa
         }
@@ -167,8 +171,12 @@ function Buscar-Archivo {
                         -Force `
                         -ErrorAction Stop |
                         Where-Object {
+
                             $_.FullName -notmatch '\\\.git\\' -and
-                            $_.FullName -notmatch '\\data\\'
+                            $_.FullName -notmatch '\\data\\' -and
+                            $_.Name -notmatch '_backup\.' -and
+                            $_.Name -notmatch '\.bak$' -and
+                            $_.Name -notmatch '\.tmp$'
                         }
                 )
 
@@ -474,6 +482,408 @@ function Leer-Archivo {
 
                 return $null
             }
+        }
+
+        default {
+
+            return $null
+        }
+    }
+}
+
+# ============================================================
+# BUSCAR CONTENIDO
+# ============================================================
+
+function Buscar-Contenido {
+
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Carpeta,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Consulta
+    )
+
+    switch ($Carpeta.ToLower()) {
+
+        "jarvis" {
+
+            $rutaBase = "C:\dev\proyectos\jarvis"
+
+            if (-not (Test-Path $rutaBase -PathType Container)) {
+
+                return $null
+            }
+
+            if ([string]::IsNullOrWhiteSpace($Consulta)) {
+
+                return $null
+            }
+
+            # =================================================
+            # LIMITAR CONSULTA
+            # =================================================
+
+            $consulta = $Consulta.Trim()
+
+            if ($consulta.Length -gt 200) {
+
+                $consulta = $consulta.Substring(0, 200)
+            }
+
+            $consultaNormalizada = Normalizar-Texto $consulta
+
+            # =================================================
+            # PALABRAS GENERICAS QUE NO APORTAN A LA BUSQUEDA
+            # =================================================
+
+            $palabrasIgnoradas = @(
+                "donde",
+                "como",
+                "cuando",
+                "quien",
+                "cual",
+                "que",
+                "para",
+                "por",
+                "con",
+                "sin",
+                "del",
+                "las",
+                "los",
+                "una",
+                "uno",
+                "unos",
+                "unas",
+                "esta",
+                "este",
+                "estos",
+                "estas",
+                "hay",
+                "hace",
+                "hacer",
+                "entre",
+                "desde",
+                "sobre",
+                "dentro",
+                "aparece",
+                "encuentra",
+                "buscar",
+                "busca",
+                "quiero",
+                "necesito",
+                "puedes",
+                "juntos"
+            )
+
+            $tokens = @(
+                $consultaNormalizada -split '\s+' |
+                    Where-Object {
+                        $_.Length -ge 2 -and
+                        $_ -notin $palabrasIgnoradas
+                    }
+            )
+
+            if ($tokens.Count -eq 0) {
+
+                $tokens = @(
+                    $consultaNormalizada -split '\s+' |
+                        Where-Object {
+                            $_.Length -ge 2
+                        }
+                )
+            }
+
+            if ($tokens.Count -eq 0) {
+
+                return "No he podido obtener un termino valido para buscar."
+            }
+
+            # =================================================
+            # EXTENSIONES PERMITIDAS
+            # =================================================
+
+            $extensionesPermitidas = @(
+                ".ps1",
+                ".psm1",
+                ".txt",
+                ".md",
+                ".json",
+                ".yaml",
+                ".yml",
+                ".xml",
+                ".js",
+                ".ts",
+                ".jsx",
+                ".tsx"
+            )
+
+            # =================================================
+            # OBTENER ARCHIVOS
+            # =================================================
+
+            try {
+
+                $archivos = @(
+                    Get-ChildItem `
+                        -Path $rutaBase `
+                        -Recurse `
+                        -File `
+                        -Force `
+                        -ErrorAction Stop |
+                        Where-Object {
+
+                            $_.FullName -notmatch '\\\.git\\' -and
+                            $_.FullName -notmatch '\\data\\' -and
+                            $_.Name -notmatch '_backup\.' -and
+                            $_.Name -notmatch '\.bak$' -and
+                            $_.Name -notmatch '\.tmp$' -and
+                            $extensionesPermitidas -contains $_.Extension.ToLower()
+                        }
+                )
+            }
+            catch {
+
+                return $null
+            }
+
+            # =================================================
+            # BUSCAR COINCIDENCIAS
+            # =================================================
+
+            $resultados = @()
+
+            foreach ($archivo in $archivos) {
+
+                try {
+
+                    if ($archivo.Length -gt 512KB) {
+
+                        continue
+                    }
+
+                    $lineasArchivo = [System.IO.File]::ReadAllLines(
+                        $archivo.FullName,
+                        [System.Text.UTF8Encoding]::new($false)
+                    )
+                }
+                catch {
+
+                    continue
+                }
+
+                $enHereString = $false
+                $numeroLinea = 0
+
+                foreach ($linea in $lineasArchivo) {
+
+                    $numeroLinea++
+
+                    # =================================================
+                    # DETECTAR BLOQUES HERE-STRING
+                    #
+                    # Estos bloques son usados por JARVIS para guardar
+                    # prompts largos. No queremos que sus ejemplos,
+                    # instrucciones o textos internos contaminen una
+                    # busqueda de codigo.
+                    # =================================================
+
+                    if (-not $enHereString) {
+
+                        if ($linea -match '@["'']\s*$') {
+
+                            $enHereString = $true
+                            continue
+                        }
+                    }
+                    else {
+
+                        if ($linea -match '^\s*["'']@') {
+
+                            $enHereString = $false
+                        }
+
+                        continue
+                    }
+
+                    if ([string]::IsNullOrWhiteSpace($linea)) {
+
+                        continue
+                    }
+
+                    $lineaNormalizada = Normalizar-Texto $linea
+
+                    $puntuacion = 0
+
+                    # =================================================
+                    # COINCIDENCIA EXACTA
+                    # =================================================
+
+                    if (
+                        $lineaNormalizada.Contains(
+                            $consultaNormalizada
+                        )
+                    ) {
+
+                        $puntuacion = 1000
+                    }
+                    else {
+
+                        # =============================================
+                        # COINCIDENCIA POR TOKENS
+                        # =============================================
+
+                        $coincidencias = 0
+
+                        foreach ($token in $tokens) {
+
+                            if (
+                                $lineaNormalizada.Contains(
+                                    $token
+                                )
+                            ) {
+
+                                $coincidencias++
+                            }
+                        }
+
+                        if ($tokens.Count -eq 1) {
+
+                            if ($coincidencias -eq 1) {
+
+                                $puntuacion = 650
+                            }
+                        }
+                        elseif (
+                            $coincidencias -eq $tokens.Count
+                        ) {
+
+                            $puntuacion = 700
+                        }
+                    }
+
+                    if ($puntuacion -eq 0) {
+
+                        continue
+                    }
+
+                    # =================================================
+                    # MEJORAR EL RANKING PARA CODIGO REAL
+                    # =================================================
+
+                    $lineaTrim = $linea.Trim()
+
+                    # Los comentarios son menos prioritarios que
+                    # las lineas ejecutables.
+                    if ($lineaTrim.StartsWith("#")) {
+
+                        $puntuacion -= 250
+                    }
+
+                    # Las declaraciones de funciones son especialmente
+                    # interesantes para busquedas de codigo.
+                    if (
+                        $lineaNormalizada.StartsWith("function ")
+                    ) {
+
+                        $puntuacion += 150
+                    }
+
+                    # Variables, asignaciones y llamadas suelen
+                    # representar codigo real.
+                    if (
+                        $linea.Contains("=") -or
+                        $lineaNormalizada.Contains(
+                            "invokerestmethod"
+                        )
+                    ) {
+
+                        $puntuacion += 100
+                    }
+
+                    if (
+                        $linea.Contains("$")
+                    ) {
+
+                        $puntuacion += 50
+                    }
+
+                    # =================================================
+                    # RUTA RELATIVA
+                    # =================================================
+
+                    $rutaRelativa =
+                        $archivo.FullName.Substring(
+                            $rutaBase.Length
+                        ).TrimStart("\")
+
+                    # =================================================
+                    # GUARDAR RESULTADO
+                    # =================================================
+
+                    $contenidoMostrar = $linea.Trim()
+
+                    if ($contenidoMostrar.Length -gt 220) {
+
+                        $contenidoMostrar =
+                            $contenidoMostrar.Substring(0, 220) + "..."
+                    }
+
+                    $resultados += [PSCustomObject]@{
+                        Ruta = $rutaRelativa
+                        Linea = $numeroLinea
+                        Contenido = $contenidoMostrar
+                        Puntuacion = $puntuacion
+                    }
+                }
+            }
+
+            # =================================================
+            # ORDENAR Y LIMITAR
+            # =================================================
+
+            $resultados = @(
+                $resultados |
+                    Sort-Object `
+                        @{ Expression = "Puntuacion"; Descending = $true },
+                        @{ Expression = "Ruta"; Descending = $false },
+                        @{ Expression = "Linea"; Descending = $false } |
+                    Select-Object -First 20
+            )
+
+            # =================================================
+            # SIN RESULTADOS
+            # =================================================
+
+            if ($resultados.Count -eq 0) {
+
+                return "No he encontrado ninguna coincidencia para '$Consulta'."
+            }
+
+            # =================================================
+            # FORMATEAR RESULTADOS
+            # =================================================
+
+            $lineasResultado = @()
+
+            $lineasResultado += "Coincidencias encontradas: $($resultados.Count)"
+            $lineasResultado += ""
+
+            foreach ($resultado in $resultados) {
+
+                $lineasResultado += "[ARCHIVO] $($resultado.Ruta)"
+                $lineasResultado += "[LINEA] $($resultado.Linea)"
+                $lineasResultado += "[CONTENIDO] $($resultado.Contenido)"
+                $lineasResultado += ""
+            }
+
+            if ($resultados.Count -eq 20) {
+
+                $lineasResultado += "Se muestran los primeros 20 resultados."
+            }
+
+            return $lineasResultado -join "`n"
         }
 
         default {

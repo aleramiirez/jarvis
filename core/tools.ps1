@@ -2,10 +2,6 @@
 # JARVIS - REGISTRO DE HERRAMIENTAS
 # ============================================================
 
-# ============================================================
-# OBTENER HERRAMIENTAS DISPONIBLES
-# ============================================================
-
 function Obtener-Herramientas {
 
     return @(
@@ -242,6 +238,42 @@ function Obtener-Herramientas {
                     Descripcion = "Proyecto JARVIS."
                     Alias = @()
                     Respuesta = "Claro. Voy a analizar ese archivo del proyecto JARVIS."
+                }
+            )
+        }
+
+        @{
+            Nombre = "buscar_contenido"
+            Descripcion = "Busca texto o conceptos dentro del contenido de los archivos permitidos del proyecto."
+            Tipo = "consulta"
+            Prioridad = 18
+
+            Capacidades = @(
+                "buscar texto dentro de archivos"
+                "buscar funciones"
+                "buscar clases"
+                "buscar variables"
+                "localizar codigo"
+                "encontrar donde se hace algo"
+            )
+
+            RequiereConfirmacion = $false
+
+            Parametros = @(
+                @{
+                    Nombre = "consulta"
+                    Tipo = "string"
+                    Requerido = $true
+                    Descripcion = "Texto o termino tecnico que se quiere localizar dentro del codigo."
+                }
+            )
+
+            Objetivos = @(
+                @{
+                    Nombre = "jarvis"
+                    Descripcion = "Buscar dentro del contenido del proyecto JARVIS."
+                    Alias = @()
+                    Respuesta = "Claro. Voy a buscar eso dentro del codigo del proyecto JARVIS."
                 }
             )
         }

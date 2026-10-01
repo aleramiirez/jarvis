@@ -227,6 +227,41 @@ function Ejecutar-Herramienta {
             }
         }
 
+        "buscar_contenido" {
+
+            if (
+                -not $Parametros.ContainsKey("consulta") -or
+                [string]::IsNullOrWhiteSpace(
+                    [string]$Parametros["consulta"]
+                )
+            ) {
+
+                return @{
+                    Exito = $false
+                    Error = "La herramienta buscar_contenido necesita el parametro 'consulta'."
+                }
+            }
+
+            $consulta = [string]$Parametros["consulta"]
+
+            $resultado = Buscar-Contenido `
+                $Objetivo `
+                $consulta
+
+            if ($null -ne $resultado) {
+
+                return @{
+                    Exito = $true
+                    Resultado = $resultado
+                }
+            }
+
+            return @{
+                Exito = $false
+                Error = "No se ha podido buscar dentro del contenido del proyecto."
+            }
+        }
+
         "informacion_sistema" {
 
             $resultado = Obtener-InformacionSistema $Objetivo

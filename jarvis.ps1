@@ -477,7 +477,8 @@ while ($true) {
                     $resultadoIA.Accion -eq "listar_carpeta" -or
                     $resultadoIA.Accion -eq "buscar_archivo" -or
                     $resultadoIA.Accion -eq "leer_archivo" -or
-                    $resultadoIA.Accion -eq "analizar_archivo"
+                    $resultadoIA.Accion -eq "analizar_archivo" -or
+                    $resultadoIA.Accion -eq "buscar_contenido"
                 ) -and
                 -not [string]::IsNullOrWhiteSpace(
                     [string]$resultadoHerramienta.Resultado
