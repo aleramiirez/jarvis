@@ -1,4 +1,3 @@
-```powershell
 # ============================================================
 # JARVIS - ASISTENTE LOCAL
 # ============================================================
@@ -21,6 +20,7 @@ $OutputEncoding = $utf8
 
 . "$PSScriptRoot\core\text.ps1"
 . "$PSScriptRoot\core\router.ps1"
+. "$PSScriptRoot\core\tools.ps1"
 
 # ============================================================
 # CARGAR HERRAMIENTAS
@@ -40,6 +40,13 @@ Write-Host ""
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "        JARVIS - ASISTENTE LOCAL" -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
+Write-Host ""
+
+$herramientas = Obtener-Herramientas
+
+Write-Host "Herramientas cargadas: $($herramientas.Count)" `
+    -ForegroundColor DarkGray
+
 Write-Host ""
 Write-Host "Escribe '/salir' para terminar." -ForegroundColor DarkGray
 Write-Host ""
@@ -68,7 +75,7 @@ while ($true) {
     }
 
     # ========================================================
-    # 1. HERRAMIENTA DEL SISTEMA
+    # 1. INFORMACION DEL SISTEMA
     # ========================================================
 
     $resultadoSistema = Obtener-InformacionSistema $mensaje
@@ -92,7 +99,8 @@ while ($true) {
     if ($null -ne $rutaRapida) {
 
         Write-Host ""
-        Write-Host "JARVIS: $($rutaRapida.Respuesta)" -ForegroundColor Cyan
+        Write-Host "JARVIS: $($rutaRapida.Respuesta)" `
+            -ForegroundColor Cyan
 
         # ----------------------------------------------------
         # ABRIR APLICACION
@@ -127,6 +135,7 @@ while ($true) {
         }
 
         Write-Host ""
+
         continue
     }
 
@@ -227,6 +236,7 @@ $mensaje
             -ForegroundColor DarkRed
 
         Write-Host ""
+
         continue
     }
 
@@ -245,6 +255,7 @@ $mensaje
             -ForegroundColor Red
 
         Write-Host ""
+
         continue
     }
 
@@ -292,4 +303,3 @@ $mensaje
 
     Write-Host ""
 }
-```
