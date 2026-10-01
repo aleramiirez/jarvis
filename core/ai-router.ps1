@@ -4,7 +4,7 @@
 
 function Obtener-Contexto-Herramientas-IA {
 
-    $herramientas = Obtener-Herramientas |
+    $herramientas = Obtener-Esquema-Herramientas |
         Where-Object {
             $_.Tipo -eq "accion"
         }
@@ -14,15 +14,39 @@ function Obtener-Contexto-Herramientas-IA {
     foreach ($herramienta in $herramientas) {
 
         $lineas += "HERRAMIENTA: $($herramienta.Nombre)"
+        $lineas += "TIPO: $($herramienta.Tipo)"
         $lineas += "DESCRIPCION: $($herramienta.Descripcion)"
+        $lineas += "CAPACIDADES:"
 
-        if ($null -ne $herramienta.Objetivos) {
+        foreach ($capacidad in $herramienta.Capacidades) {
 
-            foreach ($objetivo in $herramienta.Objetivos) {
+            $lineas += "- $capacidad"
+        }
 
-                $lineas += "- OBJETIVO: $($objetivo.Nombre)"
-                $lineas += "  DESCRIPCION: $($objetivo.Descripcion)"
+        $lineas += "REQUIERE_CONFIRMACION: $($herramienta.RequiereConfirmacion)"
+        $lineas += "PARAMETROS:"
+
+        foreach ($parametro in $herramienta.Parametros) {
+
+            $obligatorio = if ($parametro.Requerido) {
+                "si"
             }
+            else {
+                "no"
+            }
+
+            $lineas += "- $($parametro.Nombre)"
+            $lineas += "  TIPO: $($parametro.Tipo)"
+            $lineas += "  REQUERIDO: $obligatorio"
+            $lineas += "  DESCRIPCION: $($parametro.Descripcion)"
+        }
+
+        $lineas += "OBJETIVOS PERMITIDOS:"
+
+        foreach ($objetivo in $herramienta.Objetivos) {
+
+            $lineas += "- $($objetivo.Nombre)"
+            $lineas += "  DESCRIPCION: $($objetivo.Descripcion)"
         }
 
         $lineas += ""
@@ -95,6 +119,10 @@ REGLAS IMPORTANTES:
 - No devuelvas rutas de archivos.
 - No utilices "informacion_sistema" como accion.
 - La informacion del sistema se obtiene directamente desde Windows.
+- Respeta siempre los parametros definidos por cada herramienta.
+- Nunca inventes valores para parametros que no esten definidos.
+- Si una herramienta requiere confirmacion, no ejecutes la accion
+  directamente y utiliza una respuesta solicitando confirmacion.
 
 EJEMPLO 1:
 

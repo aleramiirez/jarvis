@@ -13,6 +13,19 @@ function Obtener-Herramientas {
             Nombre = "abrir_aplicacion"
             Descripcion = "Abre una aplicacion permitida de Windows."
             Tipo = "accion"
+            Capacidades = @(
+                "abrir aplicaciones de Windows"
+            )
+            RequiereConfirmacion = $false
+
+            Parametros = @(
+                @{
+                    Nombre = "aplicacion"
+                    Tipo = "string"
+                    Requerido = $true
+                    Descripcion = "Identificador de la aplicacion que se quiere abrir."
+                }
+            )
 
             Objetivos = @(
                 @{
@@ -85,6 +98,19 @@ function Obtener-Herramientas {
             Nombre = "abrir_carpeta"
             Descripcion = "Abre una carpeta permitida del sistema."
             Tipo = "accion"
+            Capacidades = @(
+                "abrir carpetas permitidas del sistema"
+            )
+            RequiereConfirmacion = $false
+
+            Parametros = @(
+                @{
+                    Nombre = "carpeta"
+                    Tipo = "string"
+                    Requerido = $true
+                    Descripcion = "Identificador de la carpeta que se quiere abrir."
+                }
+            )
 
             Objetivos = @(
                 @{
@@ -105,6 +131,26 @@ function Obtener-Herramientas {
             Nombre = "informacion_sistema"
             Descripcion = "Obtiene informacion del ordenador y del sistema."
             Tipo = "consulta"
+            Capacidades = @(
+                "consultar la hora"
+                "consultar la fecha"
+                "consultar el nombre del ordenador"
+                "consultar la memoria RAM"
+                "consultar el procesador"
+                "consultar el sistema operativo"
+                "consultar el modelo del ordenador"
+            )
+            RequiereConfirmacion = $false
+
+            Parametros = @(
+                @{
+                    Nombre = "consulta"
+                    Tipo = "string"
+                    Requerido = $true
+                    Descripcion = "Pregunta sobre la informacion del sistema que se quiere obtener."
+                }
+            )
+
             Objetivos = @()
         }
     )
@@ -199,4 +245,15 @@ function Existe-Objetivo-Herramienta {
             $Herramienta `
             $Objetivo
     )
+}
+
+# ============================================================
+# OBTENER ESQUEMA DE HERRAMIENTAS
+# ============================================================
+
+function Obtener-Esquema-Herramientas {
+
+    $herramientas = Obtener-Herramientas
+
+    return $herramientas
 }
