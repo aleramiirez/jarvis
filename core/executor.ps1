@@ -25,6 +25,21 @@ function Ejecutar-Herramienta {
     }
 
     # ========================================================
+    # VALIDAR OBJETIVO
+    # ========================================================
+
+    if (
+        -not [string]::IsNullOrWhiteSpace($Objetivo) -and
+        -not (Existe-Objetivo-Herramienta $Nombre $Objetivo)
+    ) {
+
+        return @{
+            Exito = $false
+            Error = "El objetivo '$Objetivo' no esta permitido para la herramienta '$Nombre'."
+        }
+    }
+
+    # ========================================================
     # EJECUTAR HERRAMIENTA
     # ========================================================
 
@@ -44,7 +59,7 @@ function Ejecutar-Herramienta {
 
             return @{
                 Exito = $false
-                Error = "La aplicacion '$Objetivo' no esta permitida."
+                Error = "No se ha podido abrir la aplicacion '$Objetivo'."
             }
         }
 
@@ -62,7 +77,7 @@ function Ejecutar-Herramienta {
 
             return @{
                 Exito = $false
-                Error = "La carpeta '$Objetivo' no esta permitida."
+                Error = "No se ha podido abrir la carpeta '$Objetivo'."
             }
         }
 
