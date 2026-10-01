@@ -1,20 +1,112 @@
-﻿# ============================================================
+# ============================================================
 # JARVIS - MEMORIA
-# ============================================================
-
-# ============================================================
-# MEMORIA DE CONVERSACION
 # ============================================================
 
 $script:JARVIS_HISTORIAL = @()
 
 $script:JARVIS_MAX_HISTORIAL = 8
 
+$script:JARVIS_MEMORIAS_PERSONALES = @()
+
+$script:JARVIS_ARCHIVO_MEMORIAS =
+    Join-Path $PSScriptRoot "..\data\memorias.json"
+
 # ============================================================
-# MEMORIA PERSONAL DE SESION
+# CREAR CARPETA DE DATOS
 # ============================================================
 
-$script:JARVIS_MEMORIAS_PERSONALES = @()
+function Inicializar-Carpeta-Datos {
+
+    $directorio = Split-Path `
+        -Parent `
+        $script:JARVIS_ARCHIVO_MEMORIAS
+
+    if (-not (Test-Path $directorio)) {
+
+        New-Item `
+            -ItemType Directory `
+            -Path $directorio `
+            -Force |
+            Out-Null
+    }
+}
+
+# ============================================================
+# CARGAR MEMORIAS DESDE DISCO
+# ============================================================
+
+function Cargar-Memorias-Personales {
+
+    Inicializar-Carpeta-Datos
+
+    if (-not (Test-Path $script:JARVIS_ARCHIVO_MEMORIAS)) {
+
+        $script:JARVIS_MEMORIAS_PERSONALES = @()
+
+        return
+    }
+
+    try {
+
+        $contenido = [System.IO.File]::ReadAllText(
+            $script:JARVIS_ARCHIVO_MEMORIAS,
+            [System.Text.UTF8Encoding]::new($false)
+        )
+
+        if ([string]::IsNullOrWhiteSpace($contenido)) {
+
+            $script:JARVIS_MEMORIAS_PERSONALES = @()
+
+            return
+        }
+
+        $memorias = $contenido | ConvertFrom-Json
+
+        if ($null -eq $memorias) {
+
+            $script:JARVIS_MEMORIAS_PERSONALES = @()
+
+            return
+        }
+
+        $script:JARVIS_MEMORIAS_PERSONALES = @($memorias)
+    }
+    catch {
+
+        Write-Warning `
+            "No se pudieron cargar las memorias personales. Se iniciara con memoria vacia."
+
+        $script:JARVIS_MEMORIAS_PERSONALES = @()
+    }
+}
+
+# ============================================================
+# GUARDAR MEMORIAS EN DISCO
+# ============================================================
+
+function Guardar-Memorias-Personales {
+
+    Inicializar-Carpeta-Datos
+
+    try {
+
+        $json = @(
+            $script:JARVIS_MEMORIAS_PERSONALES
+        ) | ConvertTo-Json -Depth 5
+
+        [System.IO.File]::WriteAllText(
+            $script:JARVIS_ARCHIVO_MEMORIAS,
+            $json,
+            [System.Text.UTF8Encoding]::new($false)
+        )
+
+        return $true
+    }
+    catch {
+
+        return $false
+    }
+}
 
 # ============================================================
 # INICIALIZAR MEMORIA
@@ -23,7 +115,8 @@ $script:JARVIS_MEMORIAS_PERSONALES = @()
 function Inicializar-Memoria {
 
     $script:JARVIS_HISTORIAL = @()
-    $script:JARVIS_MEMORIAS_PERSONALES = @()
+
+    Cargar-Memorias-Personales
 }
 
 # ============================================================
@@ -42,6 +135,8 @@ function Limpiar-Memoria {
 function Limpiar-Memorias-Personales {
 
     $script:JARVIS_MEMORIAS_PERSONALES = @()
+
+    Guardar-Memorias-Personales | Out-Null
 }
 
 # ============================================================
@@ -230,16 +325,17 @@ function Agregar-Memoria-Personal {
         $existente.Tipo = $Tipo
         $existente.Valor = $Valor
 
-        return $true
+    }
+    else {
+
+        $script:JARVIS_MEMORIAS_PERSONALES += [PSCustomObject]@{
+            Tipo = $Tipo
+            Clave = $Clave
+            Valor = $Valor
+        }
     }
 
-    $script:JARVIS_MEMORIAS_PERSONALES += [PSCustomObject]@{
-        Tipo = $Tipo
-        Clave = $Clave
-        Valor = $Valor
-    }
-
-    return $true
+    return Guardar-Memorias-Personales
 }
 
 # ============================================================

@@ -2,6 +2,9 @@
 # JARVIS - ARCHIVOS IGNORADOS POR GIT
 # ============================================
 
+# Datos privados de JARVIS
+data/
+
 # Copias de seguridad locales
 jarvis_backup.ps1
 
