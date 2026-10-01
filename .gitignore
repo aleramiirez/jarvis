@@ -1,0 +1,24 @@
+# ============================================
+# JARVIS - ARCHIVOS IGNORADOS POR GIT
+# ============================================
+
+# Copias de seguridad locales
+jarvis_backup.ps1
+
+# Archivos temporales
+*.tmp
+*.temp
+*.bak
+
+# Variables de entorno / secretos
+.env
+.env.*
+!.env.example
+
+# Configuración de editores
+.vscode/
+.idea/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
