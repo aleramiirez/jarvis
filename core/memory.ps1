@@ -1,10 +1,20 @@
+﻿# ============================================================
+# JARVIS - MEMORIA
 # ============================================================
-# JARVIS - MEMORIA DE CONVERSACION
+
+# ============================================================
+# MEMORIA DE CONVERSACION
 # ============================================================
 
 $script:JARVIS_HISTORIAL = @()
 
 $script:JARVIS_MAX_HISTORIAL = 8
+
+# ============================================================
+# MEMORIA PERSONAL DE SESION
+# ============================================================
+
+$script:JARVIS_MEMORIAS_PERSONALES = @()
 
 # ============================================================
 # INICIALIZAR MEMORIA
@@ -13,15 +23,25 @@ $script:JARVIS_MAX_HISTORIAL = 8
 function Inicializar-Memoria {
 
     $script:JARVIS_HISTORIAL = @()
+    $script:JARVIS_MEMORIAS_PERSONALES = @()
 }
 
 # ============================================================
-# LIMPIAR MEMORIA
+# LIMPIAR CONVERSACION
 # ============================================================
 
 function Limpiar-Memoria {
 
     $script:JARVIS_HISTORIAL = @()
+}
+
+# ============================================================
+# LIMPIAR MEMORIA PERSONAL
+# ============================================================
+
+function Limpiar-Memorias-Personales {
+
+    $script:JARVIS_MEMORIAS_PERSONALES = @()
 }
 
 # ============================================================
@@ -49,7 +69,7 @@ function Agregar-Mensaje-Memoria {
     }
 
     # ========================================================
-    # LIMITAR TAMAÑO DEL HISTORIAL
+    # LIMITAR HISTORIAL
     # ========================================================
 
     if (
@@ -119,6 +139,134 @@ function Obtener-Historial-Formateado {
                 $lineas += "$($mensaje.Rol.ToUpper()): $($mensaje.Mensaje)"
             }
         }
+    }
+
+    return $lineas -join "`n"
+}
+
+# ============================================================
+# COMPROBAR SI UNA MEMORIA ES SEGURA PARA GUARDAR
+# ============================================================
+
+function Puede-Guardar-Memoria-Personal {
+
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Clave,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Valor
+    )
+
+    if (
+        [string]::IsNullOrWhiteSpace($Clave) -or
+        [string]::IsNullOrWhiteSpace($Valor)
+    ) {
+
+        return $false
+    }
+
+    $texto = Normalizar-Texto "$Clave $Valor"
+
+    $terminosSensibles = @(
+        "contrasena"
+        "password"
+        "passwd"
+        "token"
+        "api key"
+        "apikey"
+        "clave privada"
+        "secret"
+        "secreto"
+        "tarjeta bancaria"
+        "numero de tarjeta"
+        "cvv"
+        "pin"
+        "dni"
+        "pasaporte"
+    )
+
+    foreach ($termino in $terminosSensibles) {
+
+        if ($texto.Contains($termino)) {
+
+            return $false
+        }
+    }
+
+    return $true
+}
+
+# ============================================================
+# AÑADIR MEMORIA PERSONAL
+# ============================================================
+
+function Agregar-Memoria-Personal {
+
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Tipo,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Clave,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Valor
+    )
+
+    if (-not (Puede-Guardar-Memoria-Personal $Clave $Valor)) {
+
+        return $false
+    }
+
+    $existente = $script:JARVIS_MEMORIAS_PERSONALES |
+        Where-Object {
+            $_.Clave -eq $Clave
+        } |
+        Select-Object -First 1
+
+    if ($null -ne $existente) {
+
+        $existente.Tipo = $Tipo
+        $existente.Valor = $Valor
+
+        return $true
+    }
+
+    $script:JARVIS_MEMORIAS_PERSONALES += [PSCustomObject]@{
+        Tipo = $Tipo
+        Clave = $Clave
+        Valor = $Valor
+    }
+
+    return $true
+}
+
+# ============================================================
+# OBTENER MEMORIAS PERSONALES
+# ============================================================
+
+function Obtener-Memorias-Personales {
+
+    return @($script:JARVIS_MEMORIAS_PERSONALES)
+}
+
+# ============================================================
+# OBTENER MEMORIAS PERSONALES FORMATEADAS
+# ============================================================
+
+function Obtener-Memorias-Personales-Formateadas {
+
+    if ($script:JARVIS_MEMORIAS_PERSONALES.Count -eq 0) {
+
+        return "No hay memorias personales guardadas."
+    }
+
+    $lineas = @()
+
+    foreach ($memoria in $script:JARVIS_MEMORIAS_PERSONALES) {
+
+        $lineas += "$($memoria.Tipo): $($memoria.Clave) = $($memoria.Valor)"
     }
 
     return $lineas -join "`n"

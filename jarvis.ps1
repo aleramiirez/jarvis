@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # JARVIS - ASISTENTE LOCAL
 # ============================================================
 
@@ -65,9 +65,16 @@ Write-Host ""
 Write-Host "Memoria de conversacion: activa" `
     -ForegroundColor DarkGray
 
+Write-Host "Memoria personal: activa" `
+    -ForegroundColor DarkGray
+
 Write-Host ""
 Write-Host "Escribe '/salir' para terminar." -ForegroundColor DarkGray
 Write-Host "Escribe '/limpiar' para borrar la conversacion." `
+    -ForegroundColor DarkGray
+Write-Host "Escribe '/memorias' para ver las memorias personales." `
+    -ForegroundColor DarkGray
+Write-Host "Escribe '/olvidar-memorias' para borrarlas." `
     -ForegroundColor DarkGray
 Write-Host ""
 
@@ -97,7 +104,7 @@ while ($true) {
     }
 
     # ========================================================
-    # LIMPIAR MEMORIA
+    # LIMPIAR CONVERSACION
     # ========================================================
 
     if ($mensajeNormalizado -eq "/limpiar") {
@@ -106,6 +113,54 @@ while ($true) {
 
         Write-Host ""
         Write-Host "JARVIS: He borrado la memoria de la conversacion." `
+            -ForegroundColor Cyan
+        Write-Host ""
+
+        continue
+    }
+
+    # ========================================================
+    # MOSTRAR MEMORIAS
+    # ========================================================
+
+    if ($mensajeNormalizado -eq "/memorias") {
+
+        Write-Host ""
+        Write-Host "JARVIS: Estas son mis memorias personales de esta sesion:" `
+            -ForegroundColor Cyan
+
+        Write-Host ""
+
+        $memorias = Obtener-Memorias-Personales
+
+        if ($memorias.Count -eq 0) {
+
+            Write-Host "No hay memorias personales guardadas." `
+                -ForegroundColor DarkGray
+        }
+        else {
+
+            foreach ($memoria in $memorias) {
+
+                Write-Host "- $($memoria.Clave): $($memoria.Valor)"
+            }
+        }
+
+        Write-Host ""
+
+        continue
+    }
+
+    # ========================================================
+    # OLVIDAR MEMORIAS PERSONALES
+    # ========================================================
+
+    if ($mensajeNormalizado -eq "/olvidar-memorias") {
+
+        Limpiar-Memorias-Personales
+
+        Write-Host ""
+        Write-Host "JARVIS: He borrado todas las memorias personales." `
             -ForegroundColor Cyan
         Write-Host ""
 
@@ -195,10 +250,12 @@ while ($true) {
     Write-Host ""
 
     $historial = Obtener-Historial-Formateado
+    $memoriasPersonales = Obtener-Memorias-Personales-Formateadas
 
     $resultadoIA = Resolver-Peticion-Con-IA `
         $mensaje `
-        $historial
+        $historial `
+        $memoriasPersonales
 
     if (-not $resultadoIA.Exito) {
 
@@ -241,6 +298,56 @@ while ($true) {
         Agregar-Mensaje-Memoria `
             "jarvis" `
             $resultadoIA.Respuesta
+    }
+
+    # ========================================================
+    # POSIBLE MEMORIA PERSONAL
+    # ========================================================
+
+    if ($resultadoIA.MemoriaCandidata) {
+
+        Write-Host ""
+
+        Write-Host "JARVIS: Parece que me has dado un dato que podría ser útil recordar:" `
+            -ForegroundColor Yellow
+
+        Write-Host ""
+        Write-Host "  $($resultadoIA.MemoriaClave): $($resultadoIA.MemoriaValor)" `
+            -ForegroundColor Yellow
+
+        Write-Host ""
+
+        $confirmacion = Read-Host "¿Quieres que lo recuerde durante esta sesion? (s/n)"
+
+        if (
+            $confirmacion -eq "s" -or
+            $confirmacion -eq "si"
+        ) {
+
+            $guardada = Agregar-Memoria-Personal `
+                $resultadoIA.MemoriaTipo `
+                $resultadoIA.MemoriaClave `
+                $resultadoIA.MemoriaValor
+
+            if ($guardada) {
+
+                Write-Host ""
+                Write-Host "JARVIS: De acuerdo. Lo recordaré durante esta sesion." `
+                    -ForegroundColor Cyan
+            }
+            else {
+
+                Write-Host ""
+                Write-Host "JARVIS: No puedo guardar ese dato." `
+                    -ForegroundColor Yellow
+            }
+        }
+        else {
+
+            Write-Host ""
+            Write-Host "JARVIS: De acuerdo. No lo recordaré." `
+                -ForegroundColor Cyan
+        }
     }
 
     # ========================================================
