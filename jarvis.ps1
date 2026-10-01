@@ -24,6 +24,7 @@ $OutputEncoding = $utf8
 . "$PSScriptRoot\core\memory.ps1"
 . "$PSScriptRoot\core\memory-router.ps1"
 . "$PSScriptRoot\core\ai-router.ps1"
+. "$PSScriptRoot\core\ai-analyzer.ps1"
 
 # ============================================================
 # CARGAR HERRAMIENTAS
@@ -474,7 +475,9 @@ while ($true) {
             if (
                 (
                     $resultadoIA.Accion -eq "listar_carpeta" -or
-                    $resultadoIA.Accion -eq "buscar_archivo"
+                    $resultadoIA.Accion -eq "buscar_archivo" -or
+                    $resultadoIA.Accion -eq "leer_archivo" -or
+                    $resultadoIA.Accion -eq "analizar_archivo"
                 ) -and
                 -not [string]::IsNullOrWhiteSpace(
                     [string]$resultadoHerramienta.Resultado

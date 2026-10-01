@@ -137,6 +137,96 @@ function Ejecutar-Herramienta {
             }
         }
 
+        "leer_archivo" {
+
+            if (
+                -not $Parametros.ContainsKey("ruta") -or
+                [string]::IsNullOrWhiteSpace(
+                    [string]$Parametros["ruta"]
+                )
+            ) {
+
+                return @{
+                    Exito = $false
+                    Error = "La herramienta leer_archivo necesita el parametro 'ruta'."
+                }
+            }
+
+            $ruta = [string]$Parametros["ruta"]
+
+            $resultado = Leer-Archivo `
+                $Objetivo `
+                $ruta
+
+            if ($null -ne $resultado) {
+
+                return @{
+                    Exito = $true
+                    Resultado = $resultado
+                }
+            }
+
+            return @{
+                Exito = $false
+                Error = "No se ha podido leer el archivo solicitado."
+            }
+        }
+
+        "analizar_archivo" {
+
+            if (
+                -not $Parametros.ContainsKey("ruta") -or
+                [string]::IsNullOrWhiteSpace(
+                    [string]$Parametros["ruta"]
+                )
+            ) {
+
+                return @{
+                    Exito = $false
+                    Error = "La herramienta analizar_archivo necesita el parametro 'ruta'."
+                }
+            }
+
+            $ruta = [string]$Parametros["ruta"]
+
+            # =================================================
+            # PASO 1: LEER ARCHIVO REAL
+            # =================================================
+
+            $contenido = Leer-Archivo `
+                $Objetivo `
+                $ruta
+
+            if ($null -eq $contenido) {
+
+                return @{
+                    Exito = $false
+                    Error = "No se ha podido leer el archivo que se quiere analizar."
+                }
+            }
+
+            # =================================================
+            # PASO 2: ANALIZAR CONTENIDO REAL CON IA
+            # =================================================
+
+            $resultadoAnalisis = Analizar-Contenido-Con-IA `
+                $ruta `
+                $contenido
+
+            if (-not $resultadoAnalisis.Exito) {
+
+                return @{
+                    Exito = $false
+                    Error = $resultadoAnalisis.Error
+                }
+            }
+
+            return @{
+                Exito = $true
+                Resultado = $resultadoAnalisis.Resultado
+            }
+        }
+
         "informacion_sistema" {
 
             $resultado = Obtener-InformacionSistema $Objetivo
