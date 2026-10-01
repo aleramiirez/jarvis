@@ -111,6 +111,7 @@ Solamente debes devolver un JSON valido con este formato:
   "respuesta": "respuesta breve para el usuario",
   "accion": "ninguna",
   "objetivo": "",
+  "parametros": {},
   "memoria_candidata": false,
   "memoria_tipo": "",
   "memoria_clave": "",
@@ -134,6 +135,7 @@ ACCIONES VALIDAS:
 - abrir_aplicacion
 - abrir_carpeta
 - listar_carpeta
+- buscar_archivo
 - ninguna
 
 REGLAS IMPORTANTES:
@@ -147,13 +149,43 @@ REGLAS IMPORTANTES:
 - No inventes carpetas.
 - No inventes objetivos.
 - Utiliza solamente las herramientas y objetivos definidos.
+- Utiliza "parametros" solamente para proporcionar los datos que
+  necesita una herramienta.
+- Si una herramienta requiere un parametro, debes incluirlo.
+- Nunca introduzcas una ruta del sistema dentro de un parametro
+  cuando la herramienta ya define un objetivo permitido.
 - Si la peticion corresponde a consultar el contenido del
-  proyecto JARVIS, utiliza "listar_carpeta" con objetivo "jarvis".
+  proyecto JARVIS, utiliza:
+
+  accion = "listar_carpeta"
+  objetivo = "jarvis"
+
+- Si la peticion corresponde a buscar un archivo dentro del
+  proyecto JARVIS, utiliza:
+
+  accion = "buscar_archivo"
+  objetivo = "jarvis"
+  parametros.consulta = nombre o parte del nombre del archivo.
+
+- Para buscar archivos, "parametros.consulta" debe ser un termino
+  adecuado para buscar en nombres de archivos.
+
+- Si el usuario describe un concepto en lenguaje natural, transforma
+  ese concepto al termino tecnico o nombre de archivo mas probable.
+
+- Por ejemplo, si el usuario dice "el fichero de la memoria" y existe
+  un archivo llamado "memory.ps1", utiliza "memory" como consulta.
+
+- No añadas extensiones salvo que el usuario las haya indicado o sean
+  claramente deducibles.
+
 - Si la peticion no corresponde claramente a una herramienta
   disponible, utiliza "ninguna".
+
 - Si el usuario esta haciendo una pregunta general, una conversacion
   o una peticion que no requiere una accion o consulta del ordenador,
   utiliza "ninguna".
+
 - No intentes ejecutar comandos.
 - No devuelvas comandos de PowerShell.
 - No devuelvas rutas de archivos.
@@ -196,7 +228,12 @@ Respuesta:
 {
   "respuesta": "Claro. Voy a abrir el Bloc de notas.",
   "accion": "abrir_aplicacion",
-  "objetivo": "notepad"
+  "objetivo": "notepad",
+  "parametros": {},
+  "memoria_candidata": false,
+  "memoria_tipo": "",
+  "memoria_clave": "",
+  "memoria_valor": ""
 }
 
 EJEMPLO 2:
@@ -209,10 +246,35 @@ Respuesta:
 {
   "respuesta": "Claro. Voy a consultar el contenido del proyecto JARVIS.",
   "accion": "listar_carpeta",
-  "objetivo": "jarvis"
+  "objetivo": "jarvis",
+  "parametros": {},
+  "memoria_candidata": false,
+  "memoria_tipo": "",
+  "memoria_clave": "",
+  "memoria_valor": ""
 }
 
 EJEMPLO 3:
+
+Usuario:
+necesito encontrar el fichero de la memoria
+
+Respuesta:
+
+{
+  "respuesta": "Claro. Voy a buscar ese archivo en el proyecto JARVIS.",
+  "accion": "buscar_archivo",
+  "objetivo": "jarvis",
+  "parametros": {
+    "consulta": "memory"
+  },
+  "memoria_candidata": false,
+  "memoria_tipo": "",
+  "memoria_clave": "",
+  "memoria_valor": ""
+}
+
+EJEMPLO 4:
 
 Usuario:
 hola JARVIS
@@ -223,6 +285,7 @@ Respuesta:
   "respuesta": "Hola. ¿En qué puedo ayudarte?",
   "accion": "ninguna",
   "objetivo": "",
+  "parametros": {},
   "memoria_candidata": false,
   "memoria_tipo": "",
   "memoria_clave": "",
@@ -295,6 +358,20 @@ $Mensaje
     $memoriaClave = [string]$respuestaIA.memoria_clave
     $memoriaValor = [string]$respuestaIA.memoria_valor
 
+    # ========================================================
+    # EXTRAER PARAMETROS
+    # ========================================================
+
+    $parametros = @{}
+
+    if ($null -ne $respuestaIA.parametros) {
+
+        foreach ($propiedad in $respuestaIA.parametros.PSObject.Properties) {
+
+            $parametros[$propiedad.Name] = [string]$propiedad.Value
+        }
+    }
+
     if ([string]::IsNullOrWhiteSpace($accion)) {
 
         $accion = "ninguna"
@@ -309,6 +386,8 @@ $Mensaje
         Respuesta = $respuesta
         Accion = $accion
         Objetivo = $objetivo
+        Parametros = $parametros
+
         MemoriaCandidata = $false
         MemoriaTipo = ""
         MemoriaClave = ""
@@ -364,6 +443,31 @@ $Mensaje
         return @{
             Exito = $false
             Error = "Ollama ha devuelto un objetivo no permitido: $objetivo"
+        }
+    }
+
+    # ========================================================
+    # VALIDAR PARAMETROS
+    # ========================================================
+
+    $herramienta = Obtener-Herramienta $accion
+
+    foreach ($parametro in $herramienta.Parametros) {
+
+        if ($parametro.Requerido) {
+
+            if (
+                -not $parametros.ContainsKey($parametro.Nombre) -or
+                [string]::IsNullOrWhiteSpace(
+                    [string]$parametros[$parametro.Nombre]
+                )
+            ) {
+
+                return @{
+                    Exito = $false
+                    Error = "La herramienta '$accion' necesita el parametro '$($parametro.Nombre)'."
+                }
+            }
         }
     }
 

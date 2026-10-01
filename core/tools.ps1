@@ -13,9 +13,12 @@ function Obtener-Herramientas {
             Nombre = "abrir_aplicacion"
             Descripcion = "Abre una aplicacion permitida de Windows."
             Tipo = "accion"
+            Prioridad = 30
+
             Capacidades = @(
                 "abrir aplicaciones de Windows"
             )
+
             RequiereConfirmacion = $false
 
             Parametros = @(
@@ -95,12 +98,95 @@ function Obtener-Herramientas {
         }
 
         @{
+            Nombre = "listar_carpeta"
+            Descripcion = "Lista los archivos y carpetas de una ubicacion permitida."
+            Tipo = "consulta"
+            Prioridad = 10
+
+            Capacidades = @(
+                "listar archivos"
+                "listar carpetas"
+                "consultar el contenido de una carpeta"
+            )
+
+            RequiereConfirmacion = $false
+
+            Parametros = @(
+                @{
+                    Nombre = "carpeta"
+                    Tipo = "string"
+                    Requerido = $true
+                    Descripcion = "Identificador de la carpeta cuyo contenido se quiere consultar."
+                }
+            )
+
+            Objetivos = @(
+                @{
+                    Nombre = "jarvis"
+                    Descripcion = "Carpeta del proyecto JARVIS."
+                    Alias = @(
+                        "que archivos hay en mi proyecto"
+                        "que archivos hay en el proyecto"
+                        "archivos del proyecto de jarvis"
+                        "archivos del proyecto jarvis"
+                        "archivos de jarvis"
+                        "contenido del proyecto de jarvis"
+                        "contenido del proyecto jarvis"
+                        "que hay en la carpeta de jarvis"
+                        "que hay en la carpeta jarvis"
+                        "ensename que hay en la carpeta de jarvis"
+                        "ensename que hay en la carpeta jarvis"
+                        "muestrame que hay en la carpeta de jarvis"
+                        "muestrame que hay en la carpeta jarvis"
+                    )
+                    Respuesta = "Claro. Voy a consultar el contenido del proyecto JARVIS."
+                }
+            )
+        }
+
+        @{
+            Nombre = "buscar_archivo"
+            Descripcion = "Busca archivos por nombre dentro de una ubicacion permitida."
+            Tipo = "consulta"
+            Prioridad = 15
+
+            Capacidades = @(
+                "buscar archivos por nombre"
+                "localizar un archivo"
+                "encontrar un archivo dentro de una carpeta"
+            )
+
+            RequiereConfirmacion = $false
+
+            Parametros = @(
+                @{
+                    Nombre = "consulta"
+                    Tipo = "string"
+                    Requerido = $true
+                    Descripcion = "Nombre o parte del nombre del archivo que se quiere buscar."
+                }
+            )
+
+            Objetivos = @(
+                @{
+                    Nombre = "jarvis"
+                    Descripcion = "Buscar dentro del proyecto JARVIS."
+                    Alias = @()
+                    Respuesta = "Claro. Voy a buscar el archivo en el proyecto JARVIS."
+                }
+            )
+        }
+
+        @{
             Nombre = "abrir_carpeta"
             Descripcion = "Abre una carpeta permitida del sistema."
             Tipo = "accion"
+            Prioridad = 20
+
             Capacidades = @(
                 "abrir carpetas permitidas del sistema"
             )
+
             RequiereConfirmacion = $false
 
             Parametros = @(
@@ -119,46 +205,12 @@ function Obtener-Herramientas {
                     Alias = @(
                         "proyecto de jarvis"
                         "proyecto jarvis"
-                        "carpeta de jarvis"
-                        "carpeta jarvis"
+                        "abrir la carpeta de jarvis"
+                        "abre la carpeta de jarvis"
+                        "abre la carpeta jarvis"
+                        "abrir carpeta jarvis"
                     )
                     Respuesta = "Entendido. Voy a abrir el proyecto JARVIS."
-                }
-            )
-        }
-
-        @{
-            Nombre = "listar_carpeta"
-            Descripcion = "Lista los archivos y carpetas de una ubicacion permitida."
-            Tipo = "consulta"
-            Capacidades = @(
-                "listar archivos"
-                "listar carpetas"
-                "consultar el contenido de una carpeta"
-            )
-            RequiereConfirmacion = $false
-
-            Parametros = @(
-                @{
-                    Nombre = "carpeta"
-                    Tipo = "string"
-                    Requerido = $true
-                    Descripcion = "Identificador de la carpeta cuyo contenido se quiere consultar."
-                }
-            )
-
-            Objetivos = @(
-                @{
-                    Nombre = "jarvis"
-                    Descripcion = "Carpeta del proyecto JARVIS."
-                    Alias = @(
-                        "archivos del proyecto de jarvis"
-                        "archivos del proyecto jarvis"
-                        "archivos de jarvis"
-                        "contenido del proyecto de jarvis"
-                        "contenido del proyecto jarvis"
-                    )
-                    Respuesta = "Claro. Voy a consultar el contenido del proyecto JARVIS."
                 }
             )
         }
@@ -167,6 +219,8 @@ function Obtener-Herramientas {
             Nombre = "informacion_sistema"
             Descripcion = "Obtiene informacion del ordenador y del sistema."
             Tipo = "consulta"
+            Prioridad = 5
+
             Capacidades = @(
                 "consultar la hora"
                 "consultar la fecha"
@@ -176,6 +230,7 @@ function Obtener-Herramientas {
                 "consultar el sistema operativo"
                 "consultar el modelo del ordenador"
             )
+
             RequiereConfirmacion = $false
 
             Parametros = @(
@@ -289,7 +344,5 @@ function Existe-Objetivo-Herramienta {
 
 function Obtener-Esquema-Herramientas {
 
-    $herramientas = Obtener-Herramientas
-
-    return $herramientas
+    return Obtener-Herramientas
 }

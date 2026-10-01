@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # JARVIS - ASISTENTE LOCAL
 # ============================================================
 
@@ -292,7 +292,8 @@ while ($true) {
 
         $resultado = Ejecutar-Herramienta `
             $rutaRapida.Accion `
-            $rutaRapida.Objetivo
+            $rutaRapida.Objetivo `
+            @{}
 
         if (-not $resultado.Exito) {
 
@@ -447,7 +448,8 @@ while ($true) {
 
         $resultadoHerramienta = Ejecutar-Herramienta `
             $resultadoIA.Accion `
-            $resultadoIA.Objetivo
+            $resultadoIA.Objetivo `
+            $resultadoIA.Parametros
 
         if (-not $resultadoHerramienta.Exito) {
 
@@ -470,14 +472,17 @@ while ($true) {
             # ------------------------------------------------
 
             if (
-                $resultadoIA.Accion -eq "listar_carpeta" -and
+                (
+                    $resultadoIA.Accion -eq "listar_carpeta" -or
+                    $resultadoIA.Accion -eq "buscar_archivo"
+                ) -and
                 -not [string]::IsNullOrWhiteSpace(
                     [string]$resultadoHerramienta.Resultado
                 )
             ) {
 
                 Write-Host ""
-                Write-Host "JARVIS: Contenido del proyecto JARVIS:" `
+                Write-Host "JARVIS: Resultado:" `
                     -ForegroundColor Cyan
                 Write-Host ""
 

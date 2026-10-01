@@ -9,7 +9,10 @@ function Ejecutar-Herramienta {
         [string]$Nombre,
 
         [Parameter(Mandatory = $false)]
-        [string]$Objetivo = ""
+        [string]$Objetivo = "",
+
+        [Parameter(Mandatory = $false)]
+        [hashtable]$Parametros = @{}
     )
 
     # ========================================================
@@ -96,6 +99,41 @@ function Ejecutar-Herramienta {
             return @{
                 Exito = $false
                 Error = "No se ha podido consultar la carpeta '$Objetivo'."
+            }
+        }
+
+        "buscar_archivo" {
+
+            if (
+                -not $Parametros.ContainsKey("consulta") -or
+                [string]::IsNullOrWhiteSpace(
+                    [string]$Parametros["consulta"]
+                )
+            ) {
+
+                return @{
+                    Exito = $false
+                    Error = "La herramienta buscar_archivo necesita el parametro 'consulta'."
+                }
+            }
+
+            $consulta = [string]$Parametros["consulta"]
+
+            $resultado = Buscar-Archivo `
+                $Objetivo `
+                $consulta
+
+            if ($null -ne $resultado) {
+
+                return @{
+                    Exito = $true
+                    Resultado = $resultado
+                }
+            }
+
+            return @{
+                Exito = $false
+                Error = "No se ha podido realizar la busqueda."
             }
         }
 
