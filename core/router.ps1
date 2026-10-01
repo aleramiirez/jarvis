@@ -22,7 +22,7 @@ function Obtener-Ruta-Rapida {
 
         return @{
             Tipo = "accion"
-            Accion = "abrir_app"
+            Accion = "abrir_aplicacion"
             Objetivo = "notepad"
             Respuesta = "Entendido. Voy a abrir el Bloc de notas."
         }
@@ -40,7 +40,7 @@ function Obtener-Ruta-Rapida {
 
         return @{
             Tipo = "accion"
-            Accion = "abrir_app"
+            Accion = "abrir_aplicacion"
             Objetivo = "calc"
             Respuesta = "Entendido. Voy a abrir la Calculadora."
         }
@@ -57,7 +57,7 @@ function Obtener-Ruta-Rapida {
 
         return @{
             Tipo = "accion"
-            Accion = "abrir_app"
+            Accion = "abrir_aplicacion"
             Objetivo = "mspaint"
             Respuesta = "Entendido. Voy a abrir Paint."
         }
@@ -74,7 +74,7 @@ function Obtener-Ruta-Rapida {
 
         return @{
             Tipo = "accion"
-            Accion = "abrir_app"
+            Accion = "abrir_aplicacion"
             Objetivo = "cmd"
             Respuesta = "Entendido. Voy a abrir CMD."
         }
@@ -91,7 +91,7 @@ function Obtener-Ruta-Rapida {
 
         return @{
             Tipo = "accion"
-            Accion = "abrir_app"
+            Accion = "abrir_aplicacion"
             Objetivo = "powershell"
             Respuesta = "Entendido. Voy a abrir PowerShell."
         }
@@ -110,7 +110,7 @@ function Obtener-Ruta-Rapida {
 
         return @{
             Tipo = "accion"
-            Accion = "abrir_app"
+            Accion = "abrir_aplicacion"
             Objetivo = "explorer"
             Respuesta = "Entendido. Voy a abrir el Explorador."
         }

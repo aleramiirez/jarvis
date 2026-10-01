@@ -31,6 +31,12 @@ $OutputEncoding = $utf8
 . "$PSScriptRoot\tools\system.ps1"
 
 # ============================================================
+# CARGAR EJECUTOR
+# ============================================================
+
+. "$PSScriptRoot\core\executor.ps1"
+
+# ============================================================
 # CABECERA
 # ============================================================
 
@@ -102,36 +108,15 @@ while ($true) {
         Write-Host "JARVIS: $($rutaRapida.Respuesta)" `
             -ForegroundColor Cyan
 
-        # ----------------------------------------------------
-        # ABRIR APLICACION
-        # ----------------------------------------------------
+        $resultado = Ejecutar-Herramienta `
+            $rutaRapida.Accion `
+            $rutaRapida.Objetivo
 
-        if ($rutaRapida.Accion -eq "abrir_app") {
+        if (-not $resultado.Exito) {
 
-            $resultado = Abrir-Aplicacion $rutaRapida.Objetivo
-
-            if (-not $resultado) {
-
-                Write-Host ""
-                Write-Host "JARVIS: Esa aplicacion no esta permitida." `
-                    -ForegroundColor Yellow
-            }
-        }
-
-        # ----------------------------------------------------
-        # ABRIR CARPETA
-        # ----------------------------------------------------
-
-        elseif ($rutaRapida.Accion -eq "abrir_carpeta") {
-
-            $resultado = Abrir-Carpeta $rutaRapida.Objetivo
-
-            if (-not $resultado) {
-
-                Write-Host ""
-                Write-Host "JARVIS: Esa carpeta no esta permitida." `
-                    -ForegroundColor Yellow
-            }
+            Write-Host ""
+            Write-Host "JARVIS: $($resultado.Error)" `
+                -ForegroundColor Yellow
         }
 
         Write-Host ""
@@ -168,7 +153,7 @@ El JSON debe tener exactamente estos campos:
 
 ACCIONES DISPONIBLES:
 
-abrir_app
+abrir_aplicacion
 abrir_carpeta
 ninguna
 
@@ -193,6 +178,7 @@ REGLAS:
 - No inventes informacion del sistema.
 - No inventes acciones.
 - No afirmes que has realizado una accion si no se ha ejecutado.
+- Utiliza exactamente los nombres de las acciones disponibles.
 - Devuelve solamente JSON valido.
 - No escribas Markdown.
 - No escribas explicaciones fuera del JSON.
@@ -277,26 +263,21 @@ $mensaje
     # ACCIONES DEVUELTAS POR OLLAMA
     # ========================================================
 
-    if ($jarvis.accion -eq "abrir_app") {
+    if (
+        -not [string]::IsNullOrWhiteSpace(
+            [string]$jarvis.accion
+        ) -and
+        $jarvis.accion -ne "ninguna"
+    ) {
 
-        $resultado = Abrir-Aplicacion $jarvis.objetivo
+        $resultadoHerramienta = Ejecutar-Herramienta `
+            $jarvis.accion `
+            $jarvis.objetivo
 
-        if (-not $resultado) {
-
-            Write-Host ""
-            Write-Host "JARVIS: La aplicacion solicitada no esta permitida." `
-                -ForegroundColor Yellow
-        }
-    }
-
-    elseif ($jarvis.accion -eq "abrir_carpeta") {
-
-        $resultado = Abrir-Carpeta $jarvis.objetivo
-
-        if (-not $resultado) {
+        if (-not $resultadoHerramienta.Exito) {
 
             Write-Host ""
-            Write-Host "JARVIS: La carpeta solicitada no esta permitida." `
+            Write-Host "JARVIS: $($resultadoHerramienta.Error)" `
                 -ForegroundColor Yellow
         }
     }
