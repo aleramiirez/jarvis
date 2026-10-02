@@ -1,4 +1,4 @@
-﻿# ============================================================
+# ============================================================
 # JARVIS - ASISTENTE LOCAL
 # ============================================================
 
@@ -25,6 +25,7 @@ $OutputEncoding = $utf8
 . "$PSScriptRoot\core\memory-router.ps1"
 . "$PSScriptRoot\core\ai-router.ps1"
 . "$PSScriptRoot\core\ai-analyzer.ps1"
+. "$PSScriptRoot\core\context.ps1"
 
 # ============================================================
 # CARGAR HERRAMIENTAS
@@ -90,7 +91,6 @@ while ($true) {
     $mensaje = Read-Host "TU"
 
     if ([string]::IsNullOrWhiteSpace($mensaje)) {
-
         continue
     }
 
@@ -357,39 +357,6 @@ while ($true) {
     }
 
     # ========================================================
-    # RESPUESTA DE IA
-    # ========================================================
-
-    if (
-        -not [string]::IsNullOrWhiteSpace(
-            [string]$resultadoIA.Respuesta
-        )
-    ) {
-
-        Write-Host "JARVIS: " -ForegroundColor Cyan -NoNewline
-        Write-Host $resultadoIA.Respuesta
-    }
-
-    # ========================================================
-    # GUARDAR CONVERSACION
-    # ========================================================
-
-    Agregar-Mensaje-Memoria `
-        "usuario" `
-        $mensaje
-
-    if (
-        -not [string]::IsNullOrWhiteSpace(
-            [string]$resultadoIA.Respuesta
-        )
-    ) {
-
-        Agregar-Mensaje-Memoria `
-            "jarvis" `
-            $resultadoIA.Respuesta
-    }
-
-    # ========================================================
     # POSIBLE MEMORIA PERSONAL
     # ========================================================
 
@@ -401,6 +368,7 @@ while ($true) {
             -ForegroundColor Yellow
 
         Write-Host ""
+
         Write-Host "  $($resultadoIA.MemoriaClave): $($resultadoIA.MemoriaValor)" `
             -ForegroundColor Yellow
 
@@ -459,6 +427,14 @@ while ($true) {
                 -ForegroundColor Yellow
 
             Agregar-Mensaje-Memoria `
+                "usuario" `
+                $mensaje
+
+            Agregar-Mensaje-Memoria `
+                "jarvis" `
+                $resultadoIA.Respuesta
+
+            Agregar-Mensaje-Memoria `
                 "herramienta" `
                 "La accion no se pudo ejecutar: $($resultadoHerramienta.Error)"
         }
@@ -469,33 +445,109 @@ while ($true) {
                 "Accion ejecutada correctamente: $($resultadoIA.Accion) -> $($resultadoIA.Objetivo)"
 
             # ------------------------------------------------
-            # MOSTRAR RESULTADO DE CONSULTA
+            # GENERAR RESPUESTA USANDO EL RESULTADO
             # ------------------------------------------------
 
             if (
-                (
-                    $resultadoIA.Accion -eq "listar_carpeta" -or
-                    $resultadoIA.Accion -eq "buscar_archivo" -or
-                    $resultadoIA.Accion -eq "leer_archivo" -or
-                    $resultadoIA.Accion -eq "analizar_archivo" -or
-                    $resultadoIA.Accion -eq "buscar_contenido"
-                ) -and
                 -not [string]::IsNullOrWhiteSpace(
                     [string]$resultadoHerramienta.Resultado
                 )
             ) {
 
-                Write-Host ""
-                Write-Host "JARVIS: Resultado:" `
-                    -ForegroundColor Cyan
-                Write-Host ""
+                $historialActualizado = Obtener-Historial-Formateado
+                $memoriasActualizadas = Obtener-Memorias-Personales-Formateadas
 
-                Write-Host $resultadoHerramienta.Resultado
+                $contexto = Construir-Contexto-Para-IA `
+                    -MensajeUsuario $mensaje `
+                    -ResultadoHerramienta $resultadoHerramienta.Resultado `
+                    -Historial $historialActualizado `
+                    -MemoriasPersonales $memoriasActualizadas
+
+                $respuestaConContexto = Generar-Respuesta-Con-Contexto `
+                    -Contexto $contexto
+
+                if ($respuestaConContexto.Exito) {
+
+                    Write-Host ""
+                    Write-Host "JARVIS: " -ForegroundColor Cyan -NoNewline
+                    Write-Host $respuestaConContexto.Respuesta
+
+                    Agregar-Mensaje-Memoria `
+                        "usuario" `
+                        $mensaje
+
+                    Agregar-Mensaje-Memoria `
+                        "jarvis" `
+                        $respuestaConContexto.Respuesta
+
+                    Agregar-Mensaje-Memoria `
+                        "herramienta" `
+                        $resultadoHerramienta.Resultado
+                }
+                else {
+
+                    Write-Host ""
+                    Write-Host "JARVIS: He encontrado la información, pero no he podido elaborar la respuesta." `
+                        -ForegroundColor Yellow
+
+                    Write-Host ""
+                    Write-Host $resultadoHerramienta.Resultado
+
+                    Agregar-Mensaje-Memoria `
+                        "usuario" `
+                        $mensaje
+
+                    Agregar-Mensaje-Memoria `
+                        "jarvis" `
+                        "He encontrado la información, pero no he podido elaborar la respuesta."
+
+                    Agregar-Mensaje-Memoria `
+                        "herramienta" `
+                        $resultadoHerramienta.Resultado
+                }
+            }
+            else {
+
+                # ------------------------------------------------
+                # ACCION SIN RESULTADO DE CONSULTA
+                # ------------------------------------------------
+
+                Write-Host ""
+                Write-Host "JARVIS: $($resultadoIA.Respuesta)" `
+                    -ForegroundColor Cyan
 
                 Agregar-Mensaje-Memoria `
-                    "herramienta" `
-                    $resultadoHerramienta.Resultado
+                    "usuario" `
+                    $mensaje
+
+                Agregar-Mensaje-Memoria `
+                    "jarvis" `
+                    $resultadoIA.Respuesta
             }
+        }
+    }
+    else {
+
+        # ========================================================
+        # RESPUESTA NORMAL DE IA
+        # ========================================================
+
+        if (
+            -not [string]::IsNullOrWhiteSpace(
+                [string]$resultadoIA.Respuesta
+            )
+        ) {
+
+            Write-Host "JARVIS: " -ForegroundColor Cyan -NoNewline
+            Write-Host $resultadoIA.Respuesta
+
+            Agregar-Mensaje-Memoria `
+                "usuario" `
+                $mensaje
+
+            Agregar-Mensaje-Memoria `
+                "jarvis" `
+                $resultadoIA.Respuesta
         }
     }
 
